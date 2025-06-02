@@ -7,5 +7,3 @@ Website for the Ian Yeo's "The Future of AI in the Workplace" project
 - Shadcn UI
 - TypeScript
 - Vercel
-
-## Features
