@@ -2,12 +2,12 @@
 title: "Leadership Lessons from Scaling a PropTech Startup to 470% Growth"
 date: "2025-01-01"
 category: "Leadership"
-excerpt: "Key insights from building and scaling Operance from concept to acquisition, including the strategic decisions that drove 470% revenue growth and lessons learned along the way."
+excerpt: "Key insights from my experience as CEO building and scaling a PropTech company from concept to acquisition, including the strategic decisions that drove 470% revenue growth."
 ---
 
 # Leadership Lessons from Scaling a PropTech Startup to 470% Growth
 
-Building Operance from a startup concept to a successful acquisition taught me invaluable lessons about leadership, strategic decision-making, and the unique challenges of scaling in the PropTech space. Here are the key insights that shaped our journey to 470% revenue growth.
+During my tenure as CEO of Operance (2016-2025), I had the privilege of building the company from a startup concept to a successful acquisition. This journey taught me invaluable lessons about leadership, strategic decision-making, and the unique challenges of scaling in the PropTech space. Here are the key insights that shaped our path to 470% revenue growth.
 
 ## The Foundation: Vision-Driven Leadership
 
@@ -21,7 +21,7 @@ Our vision wasn't just about building software—it was about fundamentally tran
 ### 1. Choosing the Right Market Entry Strategy
 
 **Enterprise-First Approach**
-While many startups focus on small businesses for easier initial sales, we deliberately targeted enterprise customers from day one. This decision:
+Whilst many startups focus on small businesses for easier initial sales, we deliberately targeted enterprise customers from day one. This decision:
 - Required longer sales cycles but resulted in higher LTV:CAC ratios (5.9x)
 - Forced us to build robust, scalable solutions from the start
 - Created stronger moats through deep integration and switching costs
@@ -32,14 +32,14 @@ While many startups focus on small businesses for easier initial sales, we delib
 We made the strategic decision to integrate generative AI before it became mainstream in construction. This required:
 - Significant R&D investment when resources were constrained
 - Convincing conservative industry players to adopt cutting-edge technology
-- Building internal AI expertise while the talent market was competitive
+- Building internal AI expertise whilst the talent market was competitive
 
-The payoff was substantial—our AI-powered features became a primary differentiator that accelerated our growth trajectory.
+The payoff was substantial—our AI-first features became a primary differentiator that accelerated our growth trajectory.
 
 ### 3. Building the Right Team at the Right Time
 
 **Scaling Challenges**
-One of the most difficult aspects of rapid growth was building team capacity while maintaining culture and quality:
+One of the most difficult aspects of rapid growth was building team capacity whilst maintaining culture and quality:
 
 **Technical Team Scaling**
 - Hired senior architects early to establish technical foundations
@@ -51,6 +51,17 @@ One of the most difficult aspects of rapid growth was building team capacity whi
 - Developed deep domain expertise within the sales team
 - Created scalable onboarding and customer success processes
 
+### 4. Achieving Operational Excellence
+
+**ESG Leadership**
+Our commitment to Environmental, Social, and Governance initiatives resulted in achieving a 4-star Governance score (the highest possible) within one year, demonstrating that rapid growth and responsible business practices can coexist.
+
+**Remote Team Success**
+Growing from 5 to 19 employees whilst maintaining a fully remote culture required:
+- Robust policies and clear guidance
+- Investment in team cohesion through company retreats
+- Implementation of internal AI chatbots for knowledge sharing
+
 ## Navigating Industry-Specific Challenges
 
 ### Cultural Change Management
@@ -60,7 +71,7 @@ The construction industry's resistance to change required a unique approach:
 **Gradual Value Demonstration**
 - Started with familiar use cases before introducing revolutionary features
 - Provided extensive training and support during implementation
-- Celebrated early wins to build momentum within client organizations
+- Celebrated early wins to build momentum within client organisations
 
 **Building Trust Through Results**
 - Focused on measurable ROI from day one
@@ -71,39 +82,40 @@ The construction industry's resistance to change required a unique approach:
 
 ### Balancing Growth and Profitability
 
-Achieving 470% revenue growth while maintaining financial discipline required:
+Achieving 470% revenue growth (from £82K to £472K) whilst maintaining financial discipline required:
 
 **Strategic Investment Priorities**
 1. Product development and AI capabilities
 2. Enterprise sales team expansion
-3. Customer success and retention programs
+3. Customer success and retention programmes
 4. Strategic partnerships and integrations
 
 **Capital Efficiency**
 - Maintained lean operations where possible
 - Focused on high-impact marketing channels
-- Optimized customer acquisition costs through referral programs
+- Optimised customer acquisition costs through referral programmes
+- Achieved industry-leading 46-day DSO (Days Sales Outstanding)
 
 ## Key Lessons for Future Leaders
 
 ### 1. Embrace the Long Game
-PropTech sales cycles are extended, but the payoff in terms of customer lifetime value and market position is significant. Patience and persistence are essential.
+PropTech sales cycles are extended, but the payoff in terms of customer lifetime value and market position is significant. Patience and persistence are essential. Our average sales cycle was 70 days, but we achieved £20K lifetime value per customer.
 
 ### 2. Domain Expertise is Non-Negotiable
-Success in construction technology requires deep understanding of industry workflows, pain points, and decision-making processes. Invest in building this expertise within your team.
+Success in construction technology requires deep understanding of industry workflows, pain points, and decision-making processes. As a Chartered Civil Engineer with 25+ years in the industry, this expertise proved invaluable.
 
 ### 3. Technology Must Solve Real Problems
-Avoid the temptation to build technology for technology's sake. Every feature should address a specific, measurable problem that customers are willing to pay to solve.
+Avoid the temptation to build technology for technology's sake. Every feature should address a specific, measurable problem that customers are willing to pay to solve. Our focus on saving 1.5 hours per day in productivity resonated deeply with customers.
 
 ### 4. Culture Scales or Breaks
-As we grew from a small team to 470+ enterprise customers, maintaining our culture of innovation, customer focus, and quality became both more challenging and more critical.
+As we grew to serve 470 active organisations across 158 sites and projects, maintaining our culture of innovation, customer focus, and quality became both more challenging and more critical.
 
 ## Preparing for the Next Chapter
 
-The acquisition of Operance represents not an endpoint, but a transition to the next phase of growth and impact. The lessons learned from this journey—about leadership, market positioning, team building, and strategic execution—continue to inform my approach to technology leadership.
+The successful acquisition represents not an endpoint, but a transition to the next phase of growth and impact. The lessons learned from this journey—about leadership, market positioning, team building, and strategic execution—continue to inform my approach to technology leadership.
 
 For leaders embarking on similar journeys in PropTech or other traditional industries ripe for disruption, remember that success comes from the intersection of technological innovation, deep domain expertise, and disciplined execution.
 
 ---
 
-*This post reflects on lessons learned during my tenure as CEO of Operance (2016-2025), where we achieved 470% revenue growth and successful acquisition. I'm currently available for C-suite, board advisory, and PE/VC operating partner roles.* 
+*This post reflects on lessons learned during my tenure as CEO of Operance (2016-2025), where I led the company to achieve 470% revenue growth from £82K to £472K and positioned it for successful acquisition. As a Chartered Civil Engineer and author of 'BIM for Estates', I bring unique perspective on bridging traditional construction with cutting-edge technology. I'm currently exploring new opportunities in C-suite, board advisory, and PE/VC operating partner roles.*
