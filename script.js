@@ -380,7 +380,7 @@ function displayBlogPosts(container, posts) {
       <div class="blog-read-more">
         Read More
         <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-          <path d="M5 12h14m-7-7 7 7-7 7"/>
+          <path d="M3 8h10m-4-4 4 4-4 4"/>
         </svg>
       </div>
     </article>
@@ -643,7 +643,7 @@ function displayAllPosts(container, posts) {
       <div class="all-posts-item-read-more">
         Read More
         <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-          <path d="M5 12h14m-7-7 7 7-7 7"/>
+          <path d="M3 6h6m-2-2 2 2-2 2"/>
         </svg>
       </div>
     </article>
