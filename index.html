@@ -555,6 +555,7 @@
     .contact-section {
       background: var(--bg-secondary);
       text-align: center;
+      padding-bottom: var(--spacing-3xl);
     }
 
     .contact-grid {
@@ -583,7 +584,7 @@
       left: 0;
       right: 0;
       height: 3px;
-      background: var(--gradient-accent);
+      background: var(--gradient-primary);
       transform: scaleX(0);
       transition: var(--transition-normal);
     }
@@ -780,6 +781,246 @@
     }
 
     /* ───────────────────────────────
+       Blog Post Modal
+    ─────────────────────────────── */
+    .blog-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--spacing-lg);
+      opacity: 0;
+      visibility: hidden;
+      transition: var(--transition-normal);
+    }
+
+    .blog-modal.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .blog-modal-content {
+      background: var(--bg-primary);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xl);
+      width: 100%;
+      max-width: 900px;
+      max-height: 90vh;
+      overflow-y: auto;
+      position: relative;
+      box-shadow: var(--shadow-large);
+      transform: translateY(30px);
+      transition: var(--transition-normal);
+    }
+
+    .blog-modal.active .blog-modal-content {
+      transform: translateY(0);
+    }
+
+    .blog-modal-header {
+      position: sticky;
+      top: 0;
+      background: var(--bg-primary);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: var(--spacing-lg) var(--spacing-xl);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      backdrop-filter: blur(12px);
+      z-index: 10;
+    }
+
+    .blog-modal-close {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-full);
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: var(--transition-normal);
+      color: var(--text-secondary);
+    }
+
+    .blog-modal-close:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--border-accent);
+      color: var(--text-primary);
+      transform: scale(1.05);
+    }
+
+    .blog-modal-body {
+      padding: var(--spacing-2xl);
+    }
+
+    /* Blog Content Styling */
+    .blog-content {
+      color: var(--text-primary);
+      line-height: 1.7;
+    }
+
+    .blog-content h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: var(--spacing-lg);
+      background: var(--gradient-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .blog-content h2 {
+      font-size: 2rem;
+      font-weight: 600;
+      line-height: 1.3;
+      margin: var(--spacing-2xl) 0 var(--spacing-lg) 0;
+      color: var(--text-primary);
+      border-bottom: 2px solid var(--border-subtle);
+      padding-bottom: var(--spacing-sm);
+    }
+
+    .blog-content h3 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      line-height: 1.4;
+      margin: var(--spacing-xl) 0 var(--spacing-md) 0;
+      color: var(--text-primary);
+    }
+
+    .blog-content h4 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin: var(--spacing-lg) 0 var(--spacing-sm) 0;
+      color: var(--text-primary);
+    }
+
+    .blog-content p {
+      margin-bottom: var(--spacing-lg);
+      color: var(--text-secondary);
+    }
+
+    .blog-content ul, .blog-content ol {
+      margin-bottom: var(--spacing-lg);
+      padding-left: var(--spacing-xl);
+    }
+
+    .blog-content li {
+      margin-bottom: var(--spacing-sm);
+      color: var(--text-secondary);
+    }
+
+    .blog-content li::marker {
+      color: var(--text-accent);
+    }
+
+    .blog-content blockquote {
+      border-left: 4px solid var(--text-accent);
+      padding-left: var(--spacing-lg);
+      margin: var(--spacing-xl) 0;
+      font-style: italic;
+      color: var(--text-secondary);
+      background: var(--bg-card);
+      padding: var(--spacing-lg);
+      border-radius: 0 var(--radius-md) var(--radius-md) 0;
+    }
+
+    .blog-content code {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: var(--spacing-xs) var(--spacing-sm);
+      font-family: 'Fira Code', 'Monaco', 'Consolas', monospace;
+      font-size: 0.875rem;
+      color: var(--text-accent);
+    }
+
+    .blog-content pre {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: var(--spacing-lg);
+      overflow-x: auto;
+      margin: var(--spacing-lg) 0;
+    }
+
+    .blog-content pre code {
+      background: none;
+      border: none;
+      padding: 0;
+      color: var(--text-primary);
+    }
+
+    .blog-content strong {
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .blog-content em {
+      font-style: italic;
+      color: var(--text-secondary);
+    }
+
+    .blog-content a {
+      color: var(--text-accent);
+      text-decoration: underline;
+      text-decoration-color: rgba(99, 102, 241, 0.3);
+      transition: var(--transition-normal);
+    }
+
+    .blog-content a:hover {
+      text-decoration-color: var(--text-accent);
+      color: var(--text-primary);
+    }
+
+    .blog-content hr {
+      border: none;
+      height: 1px;
+      background: var(--border-subtle);
+      margin: var(--spacing-2xl) 0;
+    }
+
+    /* Blog Modal Responsive */
+    @media (max-width: 768px) {
+      .blog-modal {
+        padding: var(--spacing-sm);
+      }
+
+      .blog-modal-content {
+        max-height: 95vh;
+      }
+
+      .blog-modal-header {
+        padding: var(--spacing-md);
+      }
+
+      .blog-modal-body {
+        padding: var(--spacing-lg);
+      }
+
+      .blog-content h1 {
+        font-size: 2rem;
+      }
+
+      .blog-content h2 {
+        font-size: 1.5rem;
+      }
+
+      .blog-content h3 {
+        font-size: 1.25rem;
+      }
+    }
+
+    /* ───────────────────────────────
        9. Responsive Design
     ─────────────────────────────── */
     @media (max-width: 768px) {
@@ -883,6 +1124,232 @@
 
     .badge:hover svg {
       transform: scale(1.1);
+    }
+
+    /* ───────────────────────────────
+       All Posts Modal
+    ─────────────────────────────── */
+    .all-posts-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--spacing-lg);
+      opacity: 0;
+      visibility: hidden;
+      transition: var(--transition-normal);
+    }
+
+    .all-posts-modal.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .all-posts-modal-content {
+      background: var(--bg-primary);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xl);
+      width: 100%;
+      max-width: 1200px;
+      max-height: 90vh;
+      overflow-y: auto;
+      position: relative;
+      box-shadow: var(--shadow-large);
+      transform: translateY(30px);
+      transition: var(--transition-normal);
+    }
+
+    .all-posts-modal.active .all-posts-modal-content {
+      transform: translateY(0);
+    }
+
+    .all-posts-modal-header {
+      position: sticky;
+      top: 0;
+      background: var(--bg-primary);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: var(--spacing-lg) var(--spacing-xl);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      backdrop-filter: blur(12px);
+      z-index: 10;
+    }
+
+    .all-posts-modal-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      background: var(--gradient-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .all-posts-modal-close {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-full);
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: var(--transition-normal);
+      color: var(--text-secondary);
+    }
+
+    .all-posts-modal-close:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--border-accent);
+      color: var(--text-primary);
+      transform: scale(1.05);
+    }
+
+    .all-posts-modal-body {
+      padding: var(--spacing-2xl);
+    }
+
+    .all-posts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: var(--spacing-lg);
+    }
+
+    .all-posts-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-lg);
+      backdrop-filter: blur(12px);
+      transition: var(--transition-normal);
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+    }
+
+    .all-posts-item::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--gradient-primary);
+      transform: scaleX(0);
+      transition: var(--transition-normal);
+    }
+
+    .all-posts-item:hover {
+      transform: translateY(-4px);
+      background: var(--bg-card-hover);
+      border-color: var(--border-accent);
+      box-shadow: var(--shadow-glow);
+    }
+
+    .all-posts-item:hover::before {
+      transform: scaleX(1);
+    }
+
+    .all-posts-item-meta {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      margin-bottom: var(--spacing-sm);
+      font-size: 0.75rem;
+    }
+
+    .all-posts-item-date {
+      color: var(--text-tertiary);
+    }
+
+    .all-posts-item-category {
+      display: inline-flex;
+      align-items: center;
+      padding: var(--spacing-xs) var(--spacing-sm);
+      background: var(--gradient-primary);
+      color: white;
+      border-radius: var(--radius-sm);
+      font-size: 0.625rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .all-posts-item-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: var(--spacing-xs);
+      line-height: 1.4;
+    }
+
+    .all-posts-item-excerpt {
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+      line-height: 1.5;
+      margin-bottom: var(--spacing-sm);
+    }
+
+    .all-posts-item-read-more {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--spacing-xs);
+      color: var(--text-accent);
+      font-weight: 500;
+      font-size: 0.75rem;
+      transition: var(--transition-normal);
+    }
+
+    .all-posts-item-read-more svg {
+      transition: transform var(--transition-normal);
+    }
+
+    .all-posts-item:hover .all-posts-item-read-more svg {
+      transform: translateX(2px);
+    }
+
+    /* All Posts Modal Responsive */
+    @media (max-width: 768px) {
+      .all-posts-modal {
+        padding: var(--spacing-sm);
+      }
+
+      .all-posts-modal-content {
+        max-height: 95vh;
+      }
+
+      .all-posts-modal-header {
+        padding: var(--spacing-md);
+      }
+
+      .all-posts-modal-body {
+        padding: var(--spacing-lg);
+      }
+
+      .all-posts-grid {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-md);
+      }
+
+      .all-posts-modal-title {
+        font-size: 1.25rem;
+      }
+    }
+
+    /* ───────────────────────────────
+       9. Contact Section (Updated)
+    ─────────────────────────────── */
+    .contact-section {
+      text-align: center;
+      padding-bottom: var(--spacing-3xl);
     }
   </style>
 
@@ -1118,6 +1585,49 @@
       </div>
     </div>
   </footer>
+
+  <!-- Blog Modal -->
+  <div class="blog-modal" id="blog-modal">
+    <div class="blog-modal-content">
+      <div class="blog-modal-header">
+        <div class="blog-modal-meta">
+          <span class="blog-category" id="modal-category"></span>
+          <span class="blog-date" id="modal-date"></span>
+        </div>
+        <button class="blog-modal-close" id="modal-close" aria-label="Close blog post">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="blog-modal-body">
+        <div class="blog-content" id="modal-content">
+          <!-- Blog content will be loaded here -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- All Posts Modal -->
+  <div class="all-posts-modal" id="all-posts-modal">
+    <div class="all-posts-modal-content">
+      <div class="all-posts-modal-header">
+        <h2 class="all-posts-modal-title">All Posts</h2>
+        <button class="all-posts-modal-close" id="all-posts-close" aria-label="Close all posts">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="all-posts-modal-body">
+        <div class="all-posts-grid" id="all-posts-grid">
+          <!-- All posts will be dynamically inserted here -->
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- Enhanced JavaScript -->
   <script>
@@ -1411,7 +1921,7 @@
         
         // Filter for markdown files and sort by name (assuming date-based naming)
         const markdownFiles = files
-          .filter(file => file.name.endsWith('.md'))
+          .filter(file => file.name.endsWith('.md') && file.name.toLowerCase() !== 'readme.md')
           .sort((a, b) => b.name.localeCompare(a.name)) // Reverse chronological order
           .slice(0, BLOG_CONFIG.maxPosts);
         
@@ -1509,12 +2019,17 @@
         </article>
       `).join('');
       
+      // Store posts data for modal access
+      container.posts = posts;
+      
       // Add click handlers for blog posts
       container.querySelectorAll('.blog-post').forEach(post => {
         post.addEventListener('click', () => {
           const slug = post.dataset.slug;
-          // Here you could implement a modal, redirect to a separate page, or expand inline
-          window.open(`https://github.com/${BLOG_CONFIG.owner}/${BLOG_CONFIG.repo}/blob/main/${BLOG_CONFIG.path}/${slug}.md`, '_blank');
+          const postData = posts.find(p => p.slug === slug);
+          if (postData) {
+            openBlogModal(postData);
+          }
         });
       });
     }
@@ -1526,6 +2041,99 @@
         month: 'long',
         day: 'numeric'
       });
+    }
+    
+    // Modal functionality
+    function openBlogModal(post) {
+      const modal = document.getElementById('blog-modal');
+      const modalCategory = document.getElementById('modal-category');
+      const modalDate = document.getElementById('modal-date');
+      const modalContent = document.getElementById('modal-content');
+      
+      modalCategory.textContent = post.category;
+      modalDate.textContent = formatDate(post.date);
+      modalContent.innerHTML = parseMarkdownToHTML(post.content);
+      
+      modal.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+    
+    function closeBlogModal() {
+      const modal = document.getElementById('blog-modal');
+      modal.classList.remove('active');
+      document.body.style.overflow = '';
+    }
+    
+    // Modal event listeners
+    document.addEventListener('DOMContentLoaded', () => {
+      const modal = document.getElementById('blog-modal');
+      const closeBtn = document.getElementById('modal-close');
+      
+      closeBtn.addEventListener('click', closeBlogModal);
+      
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          closeBlogModal();
+        }
+      });
+      
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal.classList.contains('active')) {
+          closeBlogModal();
+        }
+      });
+    });
+
+    // Simple markdown to HTML parser
+    function parseMarkdownToHTML(markdown) {
+      let html = markdown;
+      
+      // Remove frontmatter
+      html = html.replace(/^---[\s\S]*?---\n/, '');
+      
+      // Headers
+      html = html.replace(/^# (.*$)/gm, '<h1>$1</h1>');
+      html = html.replace(/^## (.*$)/gm, '<h2>$1</h2>');
+      html = html.replace(/^### (.*$)/gm, '<h3>$1</h3>');
+      html = html.replace(/^#### (.*$)/gm, '<h4>$1</h4>');
+      
+      // Bold and italic
+      html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+      html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
+      
+      // Links
+      html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+      
+      // Code blocks
+      html = html.replace(/```[\s\S]*?```/g, (match) => {
+        const code = match.replace(/```\w*\n?/g, '').replace(/```/g, '');
+        return `<pre><code>${code}</code></pre>`;
+      });
+      
+      // Inline code
+      html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+      
+      // Lists
+      html = html.replace(/^- (.*$)/gm, '<li>$1</li>');
+      html = html.replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>');
+      html = html.replace(/^\d+\. (.*$)/gm, '<li>$1</li>');
+      
+      // Paragraphs
+      html = html.split('\n\n').map(paragraph => {
+        paragraph = paragraph.trim();
+        if (!paragraph) return '';
+        if (paragraph.startsWith('<h') || paragraph.startsWith('<ul') || 
+            paragraph.startsWith('<ol') || paragraph.startsWith('<pre') ||
+            paragraph.startsWith('<hr')) {
+          return paragraph;
+        }
+        return `<p>${paragraph}</p>`;
+      }).join('\n');
+      
+      // Horizontal rules
+      html = html.replace(/^---$/gm, '<hr>');
+      
+      return html;
     }
     
     function showError(container) {
@@ -1549,11 +2157,156 @@
     // Load blog posts when the page loads
     document.addEventListener('DOMContentLoaded', loadBlogPosts);
     
-    // Handle "View All Posts" button
-    document.getElementById('view-all-posts').addEventListener('click', (e) => {
-      e.preventDefault();
-      window.open(`https://github.com/${BLOG_CONFIG.owner}/${BLOG_CONFIG.repo}/tree/main/${BLOG_CONFIG.path}`, '_blank');
+    // Initialize all functionality when page loads
+    document.addEventListener('DOMContentLoaded', () => {
+      loadBlogPosts();
+      
+      // Setup blog modal functionality
+      const modal = document.getElementById('blog-modal');
+      const closeBtn = document.getElementById('modal-close');
+      
+      closeBtn.addEventListener('click', closeBlogModal);
+      
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          closeBlogModal();
+        }
+      });
+      
+      // Setup all posts modal functionality
+      const allPostsBtn = document.getElementById('view-all-posts');
+      const allPostsModal = document.getElementById('all-posts-modal');
+      const allPostsClose = document.getElementById('all-posts-close');
+      
+      allPostsBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        loadAllPosts();
+      });
+      
+      allPostsClose.addEventListener('click', closeAllPostsModal);
+      
+      allPostsModal.addEventListener('click', (e) => {
+        if (e.target === allPostsModal) {
+          closeAllPostsModal();
+        }
+      });
+      
+      // Global keyboard event listener for both modals
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          if (modal.classList.contains('active')) {
+            closeBlogModal();
+          } else if (allPostsModal.classList.contains('active')) {
+            closeAllPostsModal();
+          }
+        }
+      });
     });
+    
+    // All Posts Modal functionality
+    async function loadAllPosts() {
+      const allPostsGrid = document.getElementById('all-posts-grid');
+      
+      // Show loading state
+      allPostsGrid.innerHTML = `
+        <div style="grid-column: 1 / -1; text-align: center; padding: var(--spacing-2xl); color: var(--text-secondary);">
+          <div class="loading-spinner" style="margin: 0 auto var(--spacing-md);"></div>
+          <p>Loading all posts...</p>
+        </div>
+      `;
+      
+      openAllPostsModal();
+      
+      try {
+        // Fetch all blog post files from GitHub API
+        const response = await fetch(`https://api.github.com/repos/${BLOG_CONFIG.owner}/${BLOG_CONFIG.repo}/contents/${BLOG_CONFIG.path}`);
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch blog posts');
+        }
+        
+        const files = await response.json();
+        
+        // Filter for markdown files and sort by name (reverse chronological order)
+        const markdownFiles = files
+          .filter(file => file.name.endsWith('.md') && file.name !== 'README.md')
+          .sort((a, b) => b.name.localeCompare(a.name));
+        
+        if (markdownFiles.length === 0) {
+          allPostsGrid.innerHTML = `
+            <div style="grid-column: 1 / -1; text-align: center; padding: var(--spacing-2xl); color: var(--text-secondary);">
+              <h3 style="color: var(--text-primary); margin-bottom: var(--spacing-md);">No posts yet</h3>
+              <p>Check back soon for insights on technology leadership and industry trends.</p>
+            </div>
+          `;
+          return;
+        }
+        
+        // Fetch content for each post
+        const posts = await Promise.all(
+          markdownFiles.map(async (file) => {
+            const contentResponse = await fetch(file.download_url);
+            const content = await contentResponse.text();
+            return parseMarkdownPost(content, file.name);
+          })
+        );
+        
+        displayAllPosts(allPostsGrid, posts);
+        
+      } catch (error) {
+        console.error('Error loading all posts:', error);
+        allPostsGrid.innerHTML = `
+          <div style="grid-column: 1 / -1; text-align: center; padding: var(--spacing-2xl); color: var(--text-secondary);">
+            <h3 style="color: var(--text-primary); margin-bottom: var(--spacing-md);">Unable to load posts</h3>
+            <p>Please check back later.</p>
+          </div>
+        `;
+      }
+    }
+    
+    function displayAllPosts(container, posts) {
+      container.innerHTML = posts.map(post => `
+        <article class="all-posts-item" data-slug="${post.slug}">
+          <div class="all-posts-item-meta">
+            <span class="all-posts-item-date">${formatDate(post.date)}</span>
+            <span class="all-posts-item-category">${post.category}</span>
+          </div>
+          <h3 class="all-posts-item-title">${post.title}</h3>
+          <p class="all-posts-item-excerpt">${post.excerpt}</p>
+          <div class="all-posts-item-read-more">
+            Read More
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M5 12h14m-7-7 7 7-7 7"/>
+            </svg>
+          </div>
+        </article>
+      `).join('');
+      
+      // Add click handlers for all posts
+      container.querySelectorAll('.all-posts-item').forEach(post => {
+        post.addEventListener('click', () => {
+          const slug = post.dataset.slug;
+          const postData = posts.find(p => p.slug === slug);
+          if (postData) {
+            closeAllPostsModal();
+            // Small delay to allow the all posts modal to close before opening the blog modal
+            setTimeout(() => openBlogModal(postData), 150);
+          }
+        });
+      });
+    }
+    
+    function openAllPostsModal() {
+      const modal = document.getElementById('all-posts-modal');
+      modal.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+    
+    function closeAllPostsModal() {
+      const modal = document.getElementById('all-posts-modal');
+      modal.classList.remove('active');
+      document.body.style.overflow = '';
+    }
   </script>
 </body>
 </html>
