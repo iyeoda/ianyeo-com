@@ -6,7 +6,7 @@
   <title>Ian Yeo – Technology Leader & Board Advisor</title>
   <meta name="description" content="Ian Yeo – Proven CEO with successful PropTech exit. 25+ years transforming construction through AI and innovation. Available for C‑suite, PE/VC operating partner, and board positions.">
 
-  <!-- Open Graph / Twitter -->
+  <!-- Open Graph / Twitter -->
   <meta property="og:type"        content="website">
   <meta property="og:title"       content="Ian Yeo – Technology Leader & Board Advisor">
   <meta property="og:description" content="Proven CEO with successful PropTech exit. 25+ years transforming construction through AI and innovation.">
@@ -17,77 +17,708 @@
   <link rel="icon" href="/favicon.ico">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
   <style>
     /* ───────────────────────────────
-       1. Design Tokens & Theme
+       1. Design System & Variables
     ─────────────────────────────── */
     :root {
-      --bg-900:#1a1a2e; --bg-800:#16213e; --primary:#3282b8; --secondary:#0f4c75;
-      --text-100:#ebeef4; --text-300:#c4c8d8; --text-500:#8f94a8;
-      --radius-lg:1.25rem; --easing:0.3s ease;
-    }
-    @media(prefers-color-scheme:light){
-      :root{ --bg-900:#ffffff; --bg-800:#f8f9fc; --text-100:#212337; --text-300:#50546a; --text-500:#6f7489; }
+      /* Dark theme */
+      --bg-primary: #0a0a0f;
+      --bg-secondary: #111118;
+      --bg-tertiary: #1a1a24;
+      --bg-card: rgba(255, 255, 255, 0.03);
+      --bg-card-hover: rgba(255, 255, 255, 0.06);
+      
+      /* Gradients */
+      --gradient-primary: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #d946ef 100%);
+      --gradient-secondary: linear-gradient(135deg, #06b6d4 0%, #3b82f6 50%, #8b5cf6 100%);
+      --gradient-accent: linear-gradient(135deg, #f59e0b 0%, #ef4444 50%, #ec4899 100%);
+      
+      /* Text colors */
+      --text-primary: #ffffff;
+      --text-secondary: #a1a1aa;
+      --text-tertiary: #71717a;
+      --text-accent: #6366f1;
+      
+      /* Border & Shadow */
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-accent: rgba(99, 102, 241, 0.3);
+      --shadow-soft: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      --shadow-medium: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      --shadow-large: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      --shadow-glow: 0 0 0 1px rgba(99, 102, 241, 0.05), 0 1px 0 0 rgba(99, 102, 241, 0.05), 0 0 56px -12px rgba(99, 102, 241, 0.25);
+      
+      /* Spacing & Sizing */
+      --spacing-xs: 0.25rem;
+      --spacing-sm: 0.5rem;
+      --spacing-md: 1rem;
+      --spacing-lg: 1.5rem;
+      --spacing-xl: 2rem;
+      --spacing-2xl: 3rem;
+      --spacing-3xl: 4rem;
+      
+      --radius-sm: 0.5rem;
+      --radius-md: 0.75rem;
+      --radius-lg: 1rem;
+      --radius-xl: 1.5rem;
+      --radius-full: 9999px;
+      
+      /* Transitions */
+      --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+      --transition-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      --transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      --transition-spring: 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
-    /* Reset */
-    *,::before,::after{margin:0;padding:0;box-sizing:border-box;}
-    html{scroll-behavior:smooth;}
-    body{
-      font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,sans-serif;
-      background:var(--bg-900);color:var(--text-100);line-height:1.6;-webkit-font-smoothing:antialiased;
+    @media(prefers-color-scheme: light) {
+      :root {
+        --bg-primary: #ffffff;
+        --bg-secondary: #f8fafc;
+        --bg-tertiary: #f1f5f9;
+        --bg-card: rgba(15, 23, 42, 0.03);
+        --bg-card-hover: rgba(15, 23, 42, 0.06);
+        --text-primary: #0f172a;
+        --text-secondary: #475569;
+        --text-tertiary: #64748b;
+        --border-subtle: rgba(15, 23, 42, 0.08);
+      }
     }
-    a{color:inherit;text-decoration:none;}
-    a:focus-visible,button:focus-visible{outline:3px dotted var(--primary);outline-offset:2px;}
-
-    /* Skip‑link */
-    .skip{position:absolute;left:-999px;top:1rem;padding:.5rem 1rem;background:var(--primary);color:#fff;border-radius:var(--radius-lg);z-index:100;transition:var(--easing);} .skip:focus{left:1rem;}
 
     /* ───────────────────────────────
-       2. Hero
+       2. Reset & Base Styles
     ─────────────────────────────── */
-    header.hero{min-height:100vh;display:grid;place-items:center;position:relative;overflow:hidden;text-align:center;}
-    header.hero canvas,header.hero .overlay{position:absolute;inset:0;}
-    header.hero .overlay{background:rgba(0,0,0,.55);} /* dark filter over canvas */
-    header.hero h1{font-size:clamp(2.5rem,6vw,4rem);background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:1rem;font-weight:700;letter-spacing:-.03em;}
-    .tagline{font-size:clamp(1.1rem,2.3vw,1.6rem);color:var(--text-300);margin-bottom:2rem;}
-    .badges{display:flex;flex-wrap:wrap;gap:.75rem;justify-content:center;margin-bottom:2.5rem;}
-    .badge{border:1px solid rgba(255,255,255,.15);padding:.35rem 1.25rem;border-radius:2rem;font-size:.9rem;background:rgba(255,255,255,.05);transition:var(--easing);} .badge:hover{border-color:var(--primary);}
-    .cta-group{display:flex;flex-wrap:wrap;gap:1rem;justify-content:center;}
-    .cta{display:inline-flex;align-items:center;gap:.35rem;padding:.9rem 2rem;border-radius:2rem;font-weight:600;transition:var(--easing);}
-    .cta.primary{background:var(--primary);color:#fff;} .cta.primary:hover{transform:translateY(-2px);} .cta.secondary{border:1px solid rgba(255,255,255,.25);backdrop-filter:blur(6px);} .cta.secondary:hover{background:rgba(255,255,255,.12);}
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.7;
+      font-weight: 400;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      overflow-x: hidden;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    button, a {
+      cursor: pointer;
+    }
+
+    a:focus-visible, button:focus-visible {
+      outline: 2px solid var(--text-accent);
+      outline-offset: 2px;
+      border-radius: var(--radius-sm);
+    }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--bg-secondary);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--text-tertiary);
+      border-radius: var(--radius-full);
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--text-secondary);
+    }
+
+    /* Skip link */
+    .skip {
+      position: absolute;
+      left: -9999px;
+      top: var(--spacing-md);
+      padding: var(--spacing-sm) var(--spacing-md);
+      background: var(--text-accent);
+      color: white;
+      border-radius: var(--radius-md);
+      font-weight: 500;
+      z-index: 1000;
+      transition: var(--transition-fast);
+    }
+    .skip:focus {
+      left: var(--spacing-md);
+    }
 
     /* ───────────────────────────────
-       3. Generic Sections
+       3. Hero Section
     ─────────────────────────────── */
-    section{padding:5rem 1.5rem;} section.alt{background:var(--bg-800);} .container{max-width:1200px;margin:0 auto;}
-    .section-title{text-align:center;font-size:2.25rem;margin-bottom:3rem;background:linear-gradient(135deg,#f093fb 0%,#f5576c 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      background: radial-gradient(ellipse at top, rgba(99, 102, 241, 0.1) 0%, transparent 50%),
+                  radial-gradient(ellipse at bottom, rgba(139, 92, 246, 0.1) 0%, transparent 50%);
+    }
 
-    /* Metrics */
-    .metrics-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:2rem;}
-    .metric{border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.03);padding:2rem;border-radius:var(--radius-lg);text-align:center;transition:var(--easing);}
-    .metric:hover{transform:translateY(-4px);} .metric-value{font-size:2.75rem;font-weight:700;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:.3rem;}
-    .metric-label{color:var(--text-500);font-size:.85rem;letter-spacing:.05em;text-transform:uppercase;}
+    .hero-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
 
-    /* Timeline */
-    .timeline{position:relative;padding-left:2rem;}
-    .timeline::before{content:"";position:absolute;left:1rem;top:0;bottom:0;width:4px;background:var(--primary);} .entry{position:relative;margin-bottom:2.5rem;}
-    .entry::before{content:"";position:absolute;left:-1rem;top:.35rem;width:.75rem;height:.75rem;border-radius:50%;background:var(--primary);} .entry h3{font-size:1.2rem;margin-bottom:.25rem;} .entry .period{font-size:.9rem;color:var(--text-500);margin-bottom:.75rem;}
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      max-width: 1000px;
+      padding: 0 var(--spacing-lg);
+      animation: heroFadeIn 1s var(--transition-normal) both;
+    }
 
-    /* Skills */
-    .skills-cloud{display:flex;flex-wrap:wrap;gap:.75rem;justify-content:center;}
-    .skill{padding:.6rem 1.4rem;border:1px solid rgba(255,255,255,.15);border-radius:999px;font-size:.9rem;background:rgba(255,255,255,.05);transition:var(--easing);} .skill:hover{background:rgba(50,130,184,.15);border-color:var(--primary);}
+    @keyframes heroFadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
 
-    /* Contact */
-    footer{text-align:center;padding:4rem 1.5rem;} .contact-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1.5rem;margin-top:2rem;}
-    .contact{border:1px solid rgba(255,255,255,.1);padding:1.5rem;border-radius:var(--radius-lg);transition:var(--easing);display:block;} .contact:hover{transform:translateY(-4px);border-color:var(--primary);} .contact-icon{font-size:1.75rem;margin-bottom:.75rem;}
+    .hero-title {
+      font-size: clamp(3rem, 8vw, 6rem);
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -0.04em;
+      margin-bottom: var(--spacing-lg);
+      background: var(--gradient-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      position: relative;
+    }
 
-    /* Responsive fixes */
-    @media(min-width:768px){header.hero h1{font-size:4rem;}}
+    .hero-subtitle {
+      font-size: clamp(1.25rem, 3vw, 1.75rem);
+      color: var(--text-secondary);
+      font-weight: 400;
+      margin-bottom: var(--spacing-2xl);
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+    }
 
-    /* Reduced motion */
-    @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;}}
+    .hero-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--spacing-md);
+      justify-content: center;
+      margin-bottom: var(--spacing-2xl);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--spacing-xs);
+      padding: var(--spacing-sm) var(--spacing-lg);
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-full);
+      font-size: 0.875rem;
+      font-weight: 500;
+      backdrop-filter: blur(12px);
+      transition: var(--transition-normal);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .badge::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+      transition: var(--transition-slow);
+    }
+
+    .badge:hover {
+      border-color: var(--border-accent);
+      background: var(--bg-card-hover);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-glow);
+    }
+
+    .badge:hover::before {
+      left: 100%;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--spacing-md);
+      justify-content: center;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      padding: var(--spacing-md) var(--spacing-xl);
+      border-radius: var(--radius-full);
+      font-weight: 600;
+      font-size: 1rem;
+      border: none;
+      cursor: pointer;
+      transition: var(--transition-normal);
+      position: relative;
+      overflow: hidden;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background: var(--gradient-primary);
+      color: white;
+      box-shadow: var(--shadow-medium);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-large);
+    }
+
+    .btn-secondary {
+      background: var(--bg-card);
+      color: var(--text-primary);
+      border: 1px solid var(--border-subtle);
+      backdrop-filter: blur(12px);
+    }
+
+    .btn-secondary:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--border-accent);
+      transform: translateY(-2px);
+    }
+
+    /* Icon animations */
+    .btn svg {
+      transition: var(--transition-normal);
+    }
+
+    .btn:hover svg {
+      transform: translateX(4px);
+    }
+
+    /* ───────────────────────────────
+       4. Section Base Styles
+    ─────────────────────────────── */
+    section {
+      padding: var(--spacing-3xl) var(--spacing-lg);
+      position: relative;
+    }
+
+    .section-alt {
+      background: var(--bg-secondary);
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: var(--spacing-3xl);
+    }
+
+    .section-title {
+      font-size: clamp(2.5rem, 5vw, 3.5rem);
+      font-weight: 700;
+      line-height: 1.2;
+      letter-spacing: -0.02em;
+      margin-bottom: var(--spacing-md);
+      background: var(--gradient-secondary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .section-subtitle {
+      font-size: 1.125rem;
+      color: var(--text-secondary);
+      max-width: 600px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    /* ───────────────────────────────
+       5. Metrics Grid
+    ─────────────────────────────── */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: var(--spacing-xl);
+    }
+
+    .metric-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xl);
+      padding: var(--spacing-2xl);
+      text-align: center;
+      backdrop-filter: blur(12px);
+      transition: var(--transition-normal);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .metric-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--gradient-primary);
+      transform: scaleX(0);
+      transition: var(--transition-normal);
+    }
+
+    .metric-card:hover {
+      transform: translateY(-8px);
+      background: var(--bg-card-hover);
+      border-color: var(--border-accent);
+      box-shadow: var(--shadow-glow);
+    }
+
+    .metric-card:hover::before {
+      transform: scaleX(1);
+    }
+
+    .metric-value {
+      font-size: 3.5rem;
+      font-weight: 800;
+      line-height: 1;
+      background: var(--gradient-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: var(--spacing-sm);
+    }
+
+    .metric-label {
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    /* ───────────────────────────────
+       6. Timeline
+    ─────────────────────────────── */
+    .timeline {
+      position: relative;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: var(--spacing-xl);
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: linear-gradient(to bottom, var(--text-accent), transparent);
+    }
+
+    .timeline-item {
+      position: relative;
+      padding-left: calc(var(--spacing-xl) * 3);
+      margin-bottom: var(--spacing-2xl);
+      opacity: 0;
+      transform: translateX(-30px);
+      transition: var(--transition-slow);
+    }
+
+    .timeline-item.animate {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: calc(var(--spacing-xl) - 6px);
+      top: var(--spacing-sm);
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--gradient-primary);
+      box-shadow: 0 0 0 4px var(--bg-primary), 0 0 20px rgba(99, 102, 241, 0.3);
+    }
+
+    .timeline-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: var(--spacing-xs);
+      color: var(--text-primary);
+    }
+
+    .timeline-period {
+      font-size: 0.875rem;
+      color: var(--text-accent);
+      font-weight: 500;
+      margin-bottom: var(--spacing-md);
+    }
+
+    .timeline-description {
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    /* ───────────────────────────────
+       7. Skills Cloud
+    ─────────────────────────────── */
+    .skills-container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .skills-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--spacing-md);
+      justify-content: center;
+    }
+
+    .skill-tag {
+      display: inline-flex;
+      align-items: center;
+      padding: var(--spacing-sm) var(--spacing-lg);
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-full);
+      font-size: 0.875rem;
+      font-weight: 500;
+      backdrop-filter: blur(12px);
+      transition: var(--transition-normal);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .skill-tag::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: var(--gradient-primary);
+      opacity: 0.1;
+      transition: var(--transition-slow);
+    }
+
+    .skill-tag:hover {
+      border-color: var(--border-accent);
+      background: var(--bg-card-hover);
+      transform: translateY(-3px);
+      color: var(--text-accent);
+    }
+
+    .skill-tag:hover::before {
+      left: 100%;
+    }
+
+    /* ───────────────────────────────
+       8. Contact Section
+    ─────────────────────────────── */
+    .contact-section {
+      background: var(--bg-secondary);
+      text-align: center;
+    }
+
+    .contact-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: var(--spacing-xl);
+      margin-top: var(--spacing-2xl);
+    }
+
+    .contact-card {
+      display: block;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xl);
+      padding: var(--spacing-2xl);
+      backdrop-filter: blur(12px);
+      transition: var(--transition-normal);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .contact-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--gradient-accent);
+      transform: scaleX(0);
+      transition: var(--transition-normal);
+    }
+
+    .contact-card:hover {
+      transform: translateY(-6px);
+      background: var(--bg-card-hover);
+      border-color: var(--border-accent);
+      box-shadow: var(--shadow-glow);
+    }
+
+    .contact-card:hover::before {
+      transform: scaleX(1);
+    }
+
+    .contact-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: var(--spacing-md);
+      color: var(--text-accent);
+      transition: transform var(--transition-normal);
+    }
+
+    .contact-icon svg {
+      transition: transform var(--transition-normal), color var(--transition-normal);
+    }
+
+    .contact-card:hover .contact-icon svg {
+      transform: scale(1.1);
+      color: var(--text-primary);
+    }
+
+    .contact-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      margin-bottom: var(--spacing-xs);
+      color: var(--text-primary);
+    }
+
+    .contact-value {
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+    }
+
+    /* ───────────────────────────────
+       9. Responsive Design
+    ─────────────────────────────── */
+    @media (max-width: 768px) {
+      .hero-content {
+        padding: 0 var(--spacing-md);
+      }
+      
+      .hero-badges {
+        gap: var(--spacing-sm);
+      }
+      
+      .badge {
+        padding: var(--spacing-xs) var(--spacing-md);
+        font-size: 0.75rem;
+      }
+      
+      .timeline::before {
+        left: var(--spacing-md);
+      }
+      
+      .timeline-item {
+        padding-left: calc(var(--spacing-md) * 3);
+      }
+      
+      .timeline-item::before {
+        left: calc(var(--spacing-md) - 6px);
+      }
+      
+      .metrics-grid {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-lg);
+      }
+      
+      .contact-grid {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-lg);
+      }
+    }
+
+    /* ───────────────────────────────
+       10. Animations & Effects
+    ─────────────────────────────── */
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .animate-float {
+      animation: float 6s ease-in-out infinite;
+    }
+
+    .animate-pulse {
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    /* Reduced motion support */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+      
+      .hero-content {
+        animation: none;
+      }
+      
+      .animate-float,
+      .animate-pulse {
+        animation: none;
+      }
+    }
+
+    /* Update badge styles for SVG icons */
+    .badge svg {
+      color: var(--text-accent);
+      margin-right: var(--spacing-xs);
+      flex-shrink: 0;
+      transition: transform var(--transition-normal);
+    }
+
+    .badge:hover svg {
+      transform: scale(1.1);
+    }
   </style>
 
   <script type="application/ld+json">
@@ -104,101 +735,464 @@
 <body>
   <a href="#main" class="skip">Skip to content</a>
 
-  <!-- Hero -->
+  <!-- Hero Section -->
   <header class="hero" role="banner">
-    <canvas id="bg-canvas" aria-hidden="true"></canvas>
-    <div class="overlay" aria-hidden="true"></div>
-    <div>
-      <h1>Ian Yeo</h1>
-      <p class="tagline">CEO with Successful Exit • AI PropTech Pioneer • 25+ Years Transforming Construction</p>
-      <div class="badges" aria-label="Key achievements">
-        <span class="badge">🚀 470% Revenue Growth</span>
-        <span class="badge">🏢 470 Enterprise Customers</span>
-        <span class="badge">💡 First‑to‑Market AI Solution</span>
-        <span class="badge">✅ Successful Acquisition</span>
+    <canvas class="hero-canvas" id="bg-canvas" aria-hidden="true"></canvas>
+    <div class="hero-content">
+      <h1 class="hero-title">Ian Yeo</h1>
+      <p class="hero-subtitle">CEO with Successful Exit • AI PropTech Pioneer • 25+ Years Transforming Construction</p>
+      
+      <div class="hero-badges" aria-label="Key achievements">
+        <span class="badge">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M22 20V8.35a2 2 0 0 0-1.11-1.79l-8-4a2 2 0 0 0-1.78 0l-8 4A2 2 0 0 0 2 8.35V20c0 .56.45 1 1 1h18c.55 0 1-.44 1-1Z"/>
+            <path d="M12 17v-5"/>
+            <path d="m9 12 3-2 3 2"/>
+          </svg>
+          <span>470% Revenue Growth</span>
+        </span>
+        <span class="badge">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M3 21h18"/>
+            <path d="M19 21v-4"/>
+            <path d="M19 17a2 2 0 0 0 2-2v-2a2 2 0 0 0-2-2h-2"/>
+            <path d="M5 21v-7"/>
+            <path d="M5 14a2 2 0 0 1-2-2v-2a2 2 0 0 1 2-2h2"/>
+            <path d="M12 21v-3"/>
+            <path d="M12 18a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-2"/>
+          </svg>
+          <span>470 Enterprise Customers</span>
+        </span>
+        <span class="badge">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 2v5"/>
+            <path d="M6.5 4.5l2.5 2.5"/>
+            <path d="M17.5 4.5 15 7"/>
+            <path d="M3 10h3"/>
+            <path d="M18 10h3"/>
+            <path d="M10 15.5c.8.8 2.2.8 3 0"/>
+            <circle cx="12" cy="12" r="9"/>
+          </svg>
+          <span>First‑to‑Market AI Solution</span>
+        </span>
+        <span class="badge">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/>
+            <path d="m9 12 2 2 4-4"/>
+          </svg>
+          <span>Successful Acquisition</span>
+        </span>
       </div>
-      <div class="cta-group">
-        <a href="#contact" class="cta primary" role="button">Available March 2025
-          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14m-7-7 7 7-7 7"/></svg>
+      
+      <div class="hero-actions">
+        <a href="#contact" class="btn btn-primary" role="button">
+          Available March 2025
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M5 12h14m-7-7 7 7-7 7"/>
+          </svg>
         </a>
-        <a href="https://linkedin.com/in/iankyeo" class="cta secondary" target="_blank" rel="noopener" role="button">LinkedIn Profile</a>
+        <a href="https://linkedin.com/in/iankyeo" class="btn btn-secondary" target="_blank" rel="noopener" role="button">
+          <svg width="20" height="20" fill="currentColor" aria-hidden="true">
+            <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+          </svg>
+          LinkedIn Profile
+        </a>
       </div>
     </div>
   </header>
 
   <main id="main">
-    <!-- Metrics -->
-    <section class="alt" id="metrics">
+    <!-- Metrics Section -->
+    <section class="section-alt" id="metrics">
       <div class="container">
-        <h2 class="section-title">By the Numbers</h2>
+        <div class="section-header">
+          <h2 class="section-title">By the Numbers</h2>
+          <p class="section-subtitle">Proven track record of building and scaling technology companies</p>
+        </div>
         <div class="metrics-grid">
-          <div class="metric" data-value="9.6" data-prefix="£" data-suffix="M"><div class="metric-value">0</div><p class="metric-label">Projected Revenue</p></div>
-          <div class="metric" data-value="470"><div class="metric-value">0</div><p class="metric-label">Enterprise Customers</p></div>
-          <div class="metric" data-value="5.9" data-suffix="x"><div class="metric-value">0</div><p class="metric-label">LTV:CAC Ratio</p></div>
-          <div class="metric" data-value="25" data-suffix="+"><div class="metric-value">0</div><p class="metric-label">Years Experience</p></div>
+          <div class="metric-card" data-value="9.6" data-prefix="£" data-suffix="M">
+            <div class="metric-value">0</div>
+            <p class="metric-label">Projected Revenue</p>
+          </div>
+          <div class="metric-card" data-value="470">
+            <div class="metric-value">0</div>
+            <p class="metric-label">Enterprise Customers</p>
+          </div>
+          <div class="metric-card" data-value="5.9" data-suffix="x">
+            <div class="metric-value">0</div>
+            <p class="metric-label">LTV:CAC Ratio</p>
+          </div>
+          <div class="metric-card" data-value="25" data-suffix="+">
+            <div class="metric-value">0</div>
+            <p class="metric-label">Years Experience</p>
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- Experience -->
+    <!-- Experience Section -->
     <section id="experience">
       <div class="container">
-        <h2 class="section-title">Leadership Journey</h2>
+        <div class="section-header">
+          <h2 class="section-title">Leadership Journey</h2>
+          <p class="section-subtitle">Building innovative solutions and leading transformational growth</p>
+        </div>
         <div class="timeline" aria-label="Professional timeline">
-          <div class="entry"><h3>CEO & Co‑Founder – Operance</h3><p class="period">2016 – 2025 (Acquired)</p><p>Built and scaled AI-powered PropTech platform from concept to acquisition. Achieved 470% revenue growth, secured 470 enterprise customers, and pioneered industry‑first generative AI for building‑information management.</p></div>
-          <div class="entry"><h3>BIM & Design Manager – Sewell Construction</h3><p class="period">2011 – 2016</p><p>Led digital transformation initiatives for top-tier construction firm. Managed £100M+ in project designs, implemented BIM processes, and drove innovation across multiple sectors.</p></div>
-          <div class="entry"><h3>Regional Design & Build Manager – Allenbuild</h3><p class="period">2002 – 2011</p><p>Managed design and planning departments across North East and Midlands regions. Delivered complex projects including £42M Kirklees College and £25M Malet Lambert School.</p></div>
+          <div class="timeline-item">
+            <h3 class="timeline-title">CEO & Co‑Founder – Operance</h3>
+            <p class="timeline-period">2016 – 2025 (Acquired)</p>
+            <p class="timeline-description">Built and scaled AI-powered PropTech platform from concept to acquisition. Achieved 470% revenue growth, secured 470 enterprise customers, and pioneered industry‑first generative AI for building‑information management.</p>
+          </div>
+          <div class="timeline-item">
+            <h3 class="timeline-title">BIM & Design Manager – Sewell Construction</h3>
+            <p class="timeline-period">2011 – 2016</p>
+            <p class="timeline-description">Led digital transformation initiatives for top-tier construction firm. Managed £100M+ in project designs, implemented BIM processes, and drove innovation across multiple sectors.</p>
+          </div>
+          <div class="timeline-item">
+            <h3 class="timeline-title">Regional Design & Build Manager – Allenbuild</h3>
+            <p class="timeline-period">2002 – 2011</p>
+            <p class="timeline-description">Managed design and planning departments across North East and Midlands regions. Delivered complex projects including £42M Kirklees College and £25M Malet Lambert School.</p>
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- Skills -->
-    <section class="alt" id="skills">
+    <!-- Skills Section -->
+    <section class="section-alt" id="skills">
       <div class="container">
-        <h2 class="section-title">Expertise & Capabilities</h2>
-        <div class="skills-cloud" aria-label="Skill set">
-          <span class="skill">CEO Leadership</span><span class="skill">AI & Machine Learning</span><span class="skill">PropTech Innovation</span><span class="skill">SaaS Scaling</span><span class="skill">M&A Experience</span><span class="skill">Enterprise Sales</span><span class="skill">Building Information Management</span><span class="skill">Python</span><span class="skill">TypeScript</span><span class="skill">Cloud Architecture</span><span class="skill">Team Building</span><span class="skill">Strategic Planning</span><span class="skill">Fundraising</span><span class="skill">Digital Transformation</span><span class="skill">Construction Technology</span>
+        <div class="section-header">
+          <h2 class="section-title">Expertise & Capabilities</h2>
+          <p class="section-subtitle">Deep technical knowledge combined with strategic business acumen</p>
+        </div>
+        <div class="skills-container">
+          <div class="skills-grid" aria-label="Skill set">
+            <span class="skill-tag">CEO Leadership</span>
+            <span class="skill-tag">AI & Machine Learning</span>
+            <span class="skill-tag">PropTech Innovation</span>
+            <span class="skill-tag">SaaS Scaling</span>
+            <span class="skill-tag">M&A Experience</span>
+            <span class="skill-tag">Enterprise Sales</span>
+            <span class="skill-tag">Building Information Management</span>
+            <span class="skill-tag">Python</span>
+            <span class="skill-tag">TypeScript</span>
+            <span class="skill-tag">Cloud Architecture</span>
+            <span class="skill-tag">Team Building</span>
+            <span class="skill-tag">Strategic Planning</span>
+            <span class="skill-tag">Fundraising</span>
+            <span class="skill-tag">Digital Transformation</span>
+            <span class="skill-tag">Construction Technology</span>
+          </div>
         </div>
       </div>
     </section>
   </main>
 
-  <!-- Contact -->
-  <footer id="contact">
-    <h2 class="section-title">Let's Connect</h2>
-    <p style="font-size:1.1rem;color:var(--text-300);">Seeking C‑Suite, PE/VC Operating Partner, or Strategic Advisory roles</p>
-    <div class="contact-grid">
-      <a href="mailto:ianyeo@gmail.com" class="contact" aria-label="Send an email"><div class="contact-icon" aria-hidden="true">📧</div><strong>Email</strong><p>ianyeo@gmail.com</p></a>
-      <a href="https://linkedin.com/in/iankyeo" class="contact" target="_blank" rel="noopener" aria-label="LinkedIn profile"><div class="contact-icon" aria-hidden="true">💼</div><strong>LinkedIn</strong><p>linkedin.com/in/iankyeo</p></a>
-      <a href="tel:+447753811081" class="contact" aria-label="Call Ian"><div class="contact-icon" aria-hidden="true">📱</div><strong>Phone</strong><p>+44 7753 811081</p></a>
+  <!-- Contact Section -->
+  <footer class="contact-section" id="contact">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">Let's Connect</h2>
+        <p class="section-subtitle">Seeking C‑Suite, PE/VC Operating Partner, or Strategic Advisory roles</p>
+      </div>
+      <div class="contact-grid">
+        <a href="mailto:ianyeo@gmail.com" class="contact-card" aria-label="Send an email">
+          <span class="contact-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect width="20" height="16" x="2" y="4" rx="2"/>
+              <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+            </svg>
+          </span>
+          <div class="contact-title">Email</div>
+          <p class="contact-value">ianyeo@gmail.com</p>
+        </a>
+        <a href="https://linkedin.com/in/iankyeo" class="contact-card" target="_blank" rel="noopener" aria-label="LinkedIn profile">
+          <span class="contact-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
+              <rect width="4" height="12" x="2" y="9"/>
+              <circle cx="4" cy="4" r="2"/>
+            </svg>
+          </span>
+          <div class="contact-title">LinkedIn</div>
+          <p class="contact-value">linkedin.com/in/iankyeo</p>
+        </a>
+        <a href="tel:+447753811081" class="contact-card" aria-label="Call Ian">
+          <span class="contact-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+            </svg>
+          </span>
+          <div class="contact-title">Phone</div>
+          <p class="contact-value">+44 7753 811081</p>
+        </a>
+      </div>
     </div>
   </footer>
 
-  <!-- ───────────────────────────────
-       4. Scripts – loaded last
-  ─────────────────────────────── -->
+  <!-- Enhanced JavaScript -->
   <script>
-    /* Canvas animation: disabled if prefers‑reduced‑motion */
+    // ─────────────────────────────────────────────────────────────
+    // 1. Enhanced Canvas Animation
+    // ─────────────────────────────────────────────────────────────
     const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if(!prefersReduced){
-      const cvs = document.getElementById('bg-canvas');
-      const ctx = cvs.getContext('2d');
-      let w = cvs.width = window.innerWidth, h = cvs.height = window.innerHeight;
-      window.addEventListener('resize',()=>{w=cvs.width=innerWidth;h=cvs.height=innerHeight});
-      const P=[],N=90,D=140;
-      class Dot{constructor(){this.x=Math.random()*w;this.y=Math.random()*h;this.vx=(Math.random()-.5)*.4;this.vy=(Math.random()-.5)*.4;this.r=Math.random()*2+1;}update(){this.x+=this.vx;this.y+=this.vy;if(this.x<0||this.x>w)this.vx*=-1;if(this.y<0||this.y>h)this.vy*=-1;}draw(){ctx.beginPath();ctx.arc(this.x,this.y,this.r,0,Math.PI*2);ctx.fillStyle='rgba(50,130,184,.55)';ctx.fill();}}
-      for(let i=0;i<N;i++)P.push(new Dot());
-      (function anim(){ctx.clearRect(0,0,w,h);for(const p of P){p.update();p.draw();}for(let i=0;i<N;i++)for(let j=i+1;j<N;j++){const dx=P[i].x-P[j].x,dy=P[i].y-P[j].y,dist=Math.hypot(dx,dy);if(dist<D){ctx.beginPath();ctx.moveTo(P[i].x,P[i].y);ctx.lineTo(P[j].x,P[j].y);ctx.strokeStyle=`rgba(50,130,184,${0.25*(1-dist/D)})`;ctx.stroke();}}requestAnimationFrame(anim);})();
+    
+    if (!prefersReduced) {
+      const canvas = document.getElementById('bg-canvas');
+      const ctx = canvas.getContext('2d');
+      let animationId;
+      
+      // Responsive canvas setup
+      function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+      
+      resizeCanvas();
+      window.addEventListener('resize', resizeCanvas);
+      
+      // Particle system
+      class Particle {
+        constructor() {
+          this.reset();
+          this.y = Math.random() * canvas.height; // Start at random position initially
+        }
+        
+        reset() {
+          this.x = Math.random() * canvas.width;
+          this.y = -10;
+          this.vx = (Math.random() - 0.5) * 0.8;
+          this.vy = Math.random() * 0.5 + 0.2;
+          this.radius = Math.random() * 3 + 1;
+          this.opacity = Math.random() * 0.5 + 0.3;
+          this.life = 1;
+          this.decay = Math.random() * 0.01 + 0.005;
+        }
+        
+        update() {
+          this.x += this.vx;
+          this.y += this.vy;
+          this.life -= this.decay;
+          
+          // Reset particle when it goes off screen or fades out
+          if (this.y > canvas.height + 10 || this.life <= 0) {
+            this.reset();
+          }
+          
+          // Wrap around horizontally
+          if (this.x < -10) this.x = canvas.width + 10;
+          if (this.x > canvas.width + 10) this.x = -10;
+        }
+        
+        draw() {
+          ctx.save();
+          ctx.globalAlpha = this.opacity * this.life;
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+          
+          // Gradient fill
+          const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.radius * 2);
+          gradient.addColorStop(0, 'rgba(99, 102, 241, 0.8)');
+          gradient.addColorStop(0.5, 'rgba(139, 92, 246, 0.4)');
+          gradient.addColorStop(1, 'rgba(217, 70, 239, 0.1)');
+          
+          ctx.fillStyle = gradient;
+          ctx.fill();
+          ctx.restore();
+        }
+      }
+      
+      // Create particles
+      const particles = Array.from({ length: 80 }, () => new Particle());
+      
+      // Animation loop
+      function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        particles.forEach(particle => {
+          particle.update();
+          particle.draw();
+        });
+        
+        // Draw connections between nearby particles
+        for (let i = 0; i < particles.length; i++) {
+          for (let j = i + 1; j < particles.length; j++) {
+            const dx = particles[i].x - particles[j].x;
+            const dy = particles[i].y - particles[j].y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            
+            if (distance < 150) {
+              ctx.save();
+              ctx.globalAlpha = (150 - distance) / 150 * 0.2;
+              ctx.strokeStyle = 'rgba(99, 102, 241, 0.3)';
+              ctx.lineWidth = 1;
+              ctx.beginPath();
+              ctx.moveTo(particles[i].x, particles[i].y);
+              ctx.lineTo(particles[j].x, particles[j].y);
+              ctx.stroke();
+              ctx.restore();
+            }
+          }
+        }
+        
+        animationId = requestAnimationFrame(animate);
+      }
+      
+      animate();
+      
+      // Clean up on page unload
+      window.addEventListener('beforeunload', () => {
+        if (animationId) {
+          cancelAnimationFrame(animationId);
+        }
+      });
     }
-
-    /* IntersectionObservers for reveal & metrics */
-    const revealEls = document.querySelectorAll('.entry, .skill, .metric');
-    const revealObserver = new IntersectionObserver((entries)=>{entries.forEach(e=>{if(e.isIntersecting){e.target.style.transform='none';e.target.style.opacity='1';revealObserver.unobserve(e.target);}})},{threshold:.15});
-    revealEls.forEach(el=>{el.style.opacity='0';el.style.transform='translateY(30px)';revealObserver.observe(el);});
-
-    /* Metric counters */
-    const metricObserver = new IntersectionObserver((entries)=>{entries.forEach(entry=>{if(entry.isIntersecting){const el=entry.target;const target=+el.dataset.value;const prefix=el.dataset.prefix||'';const suffix=el.dataset.suffix||'';let cur=0;const inc=target/60;const span=el.querySelector('.metric-value');const tick=()=>{cur+=inc;if(cur>=target){cur=target}span.textContent=prefix+cur.toFixed(1).replace(/\.0$/,'')+suffix;if(cur<target)requestAnimationFrame(tick);};tick();metricObserver.unobserve(el);}})},{threshold:.4});
-    document.querySelectorAll('.metric').forEach(m=>metricObserver.observe(m));
+    
+    // ─────────────────────────────────────────────────────────────
+    // 2. Intersection Observer for Animations
+    // ─────────────────────────────────────────────────────────────
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    };
+    
+    // Timeline animation
+    const timelineObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('animate');
+          timelineObserver.unobserve(entry.target);
+        }
+      });
+    }, observerOptions);
+    
+    document.querySelectorAll('.timeline-item').forEach(item => {
+      timelineObserver.observe(item);
+    });
+    
+    // ─────────────────────────────────────────────────────────────
+    // 3. Enhanced Metric Counters
+    // ─────────────────────────────────────────────────────────────
+    const metricObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          animateMetric(entry.target);
+          metricObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.5 });
+    
+    function animateMetric(element) {
+      const target = parseFloat(element.dataset.value);
+      const prefix = element.dataset.prefix || '';
+      const suffix = element.dataset.suffix || '';
+      const valueElement = element.querySelector('.metric-value');
+      
+      let current = 0;
+      const increment = target / 60; // 60 frames for smooth animation
+      const duration = 2000; // 2 seconds
+      const startTime = performance.now();
+      
+      function updateValue(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        
+        // Easing function for smooth animation
+        const easeOutQuart = 1 - Math.pow(1 - progress, 4);
+        current = target * easeOutQuart;
+        
+        // Format the value
+        let displayValue = current.toFixed(1).replace(/\.0$/, '');
+        valueElement.textContent = prefix + displayValue + suffix;
+        
+        if (progress < 1) {
+          requestAnimationFrame(updateValue);
+        } else {
+          // Ensure we end with the exact target value
+          let finalValue = target.toFixed(1).replace(/\.0$/, '');
+          valueElement.textContent = prefix + finalValue + suffix;
+        }
+      }
+      
+      requestAnimationFrame(updateValue);
+    }
+    
+    document.querySelectorAll('.metric-card').forEach(metric => {
+      metricObserver.observe(metric);
+    });
+    
+    // ─────────────────────────────────────────────────────────────
+    // 4. Smooth Scroll Enhancement
+    // ─────────────────────────────────────────────────────────────
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+          });
+        }
+      });
+    });
+    
+    // ─────────────────────────────────────────────────────────────
+    // 5. Dynamic Theme Based on Time
+    // ─────────────────────────────────────────────────────────────
+    function setDynamicTheme() {
+      const hour = new Date().getHours();
+      const isDark = hour < 7 || hour > 19;
+      
+      if (isDark && !window.matchMedia('(prefers-color-scheme: light)').matches) {
+        document.documentElement.style.setProperty('--bg-primary', '#0a0a0f');
+        document.documentElement.style.setProperty('--bg-secondary', '#111118');
+      }
+    }
+    
+    setDynamicTheme();
+    
+    // ─────────────────────────────────────────────────────────────
+    // 6. Performance Monitoring
+    // ─────────────────────────────────────────────────────────────
+    window.addEventListener('load', () => {
+      // Add loaded class for any CSS transitions that depend on page load
+      document.body.classList.add('loaded');
+      
+      // Log performance metrics (for development)
+      if (typeof performance !== 'undefined' && performance.mark) {
+        performance.mark('page-interactive');
+        
+        // Measure from navigation start to interactive
+        if (performance.measure) {
+          performance.measure('total-load-time', 'navigationStart', 'page-interactive');
+        }
+      }
+    });
+    
+    // ─────────────────────────────────────────────────────────────
+    // 7. Enhanced Accessibility
+    // ─────────────────────────────────────────────────────────────
+    
+    // Add keyboard navigation for card elements
+    document.querySelectorAll('.metric-card, .contact-card, .skill-tag').forEach(element => {
+      element.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          element.click();
+        }
+      });
+    });
+    
+    // Add visual feedback for focus
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Tab') {
+        document.body.classList.add('keyboard-navigation');
+      }
+    });
+    
+    document.addEventListener('mousedown', () => {
+      document.body.classList.remove('keyboard-navigation');
+    });
   </script>
 </body>
 </html>
