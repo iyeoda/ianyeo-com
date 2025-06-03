@@ -190,6 +190,73 @@
       animation: heroFadeIn 1s var(--transition-normal) both;
     }
 
+    /* Hero Profile Image */
+    .hero-profile {
+      margin-bottom: var(--spacing-2xl); /* Adjust: var(--spacing-xl) for closer to title, var(--spacing-3xl) for further */
+      display: flex;
+      justify-content: center; /* Options: center, flex-start (left), flex-end (right) */
+      animation: profileFadeIn 1s var(--transition-normal) 0.3s both;
+      /* Uncomment to add top margin: margin-top: var(--spacing-lg); */
+    }
+
+    .hero-avatar {
+      width: 160px;  /* Adjust size: 120px (smaller), 180px (larger), 200px (much larger) */
+      height: 160px; /* Keep same as width for perfect circle */
+      border-radius: var(--radius-full);
+      border: 2px solid transparent;
+      background: var(--gradient-primary);
+      padding: 4px;
+      position: relative;
+      transition: var(--transition-normal);
+      cursor: pointer;
+    }
+
+    .hero-avatar:hover {
+      transform: scale(1.05);
+      box-shadow: var(--shadow-glow);
+    }
+
+    .hero-avatar img {
+      width: 100%;
+      height: 100%;
+      border-radius: var(--radius-full);
+      object-fit: cover;
+      object-position: 10% 50% !important;  /* Move image left */
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-avatar::before {
+      content: '';
+      position: absolute;
+      top: -4px;
+      left: -4px;
+      right: -4px;
+      bottom: -4px;
+      background: var(--gradient-primary);
+      border-radius: var(--radius-full);
+      opacity: 0;
+      transition: var(--transition-normal);
+      z-index: 0;
+    }
+
+    .hero-avatar:hover::before {
+      opacity: 0.6;
+      transform: scale(1.1);
+      filter: blur(8px);
+    }
+
+    @keyframes profileFadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.9);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
     @keyframes heroFadeIn {
       from {
         opacity: 0;
@@ -555,7 +622,7 @@
     .contact-section {
       background: var(--bg-secondary);
       text-align: center;
-      padding-bottom: var(--spacing-3xl);
+      padding: var(--spacing-3xl);
     }
 
     .contact-grid {
@@ -1028,6 +1095,15 @@
         padding: 0 var(--spacing-md);
       }
       
+      .hero-avatar {
+        width: 120px;
+        height: 120px;
+      }
+      
+      .hero-profile {
+        margin-bottom: var(--spacing-xl);
+      }
+      
       .hero-badges {
         gap: var(--spacing-sm);
       }
@@ -1371,6 +1447,11 @@
   <header class="hero" role="banner">
     <canvas class="hero-canvas" id="bg-canvas" aria-hidden="true"></canvas>
     <div class="hero-content">
+      <div class="hero-profile">
+        <div class="hero-avatar">
+          <img src="/assets/ian-yeo-profile.jpg" alt="Ian Yeo - Technology Leader & Board Advisor" loading="eager">
+        </div>
+      </div>
       <h1 class="hero-title">Ian Yeo</h1>
       <p class="hero-subtitle">CEO with Successful Exit • AI PropTech Pioneer • 25+ Years Transforming Construction</p>
       
