@@ -2125,7 +2125,15 @@ section {
   background: var(--bg-card);
   color: var(--text-primary);
   font-size: 0.875rem;
+  font-family: inherit;
   transition: var(--transition-normal);
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+  color: var(--text-secondary);
+  font-family: inherit;
+  opacity: 1;
 }
 
 .form-group input:focus,
@@ -2145,6 +2153,8 @@ section {
   flex-direction: row;
   align-items: flex-start;
   gap: var(--spacing-md);
+  margin-top: var(--spacing-lg);
+  padding-top: var(--spacing-lg);
 }
 
 .checkbox-label {
@@ -2161,6 +2171,8 @@ section {
   width: 18px;
   height: 18px;
   flex-shrink: 0;
+  accent-color: var(--text-accent);
+  cursor: pointer;
 }
 
 .consent-text {
@@ -2176,6 +2188,15 @@ section {
 
 .form-actions .btn {
   min-width: 120px;
+  min-height: 48px;
+  height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.form-actions .btn:active {
+  transform: none;
 }
 
 .submit-loading {
