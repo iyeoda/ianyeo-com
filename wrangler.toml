@@ -19,7 +19,7 @@ preview_bucket_name = "executive-reports-preview"  # Optional: for development
 # Environment variables (set via dashboard or wrangler secret)
 [vars]
 SITE_URL = "https://ianyeo.com"
-REPORT_FILE_KEY = "executive-report.pdf"  # File key in R2 bucket
+REPORT_FILE_KEY = "Ian_Yeo_CEO_Executive_Brief_2025.pdf"  # File key in R2 bucket
 ZOHO_FROM_EMAIL = "ian@ianyeo.com"  # Your verified Zoho sender email
 
 # Routes for handling API requests
