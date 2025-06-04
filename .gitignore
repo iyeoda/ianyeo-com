@@ -38,6 +38,9 @@ logs/
 .temp/
 tmp/
 
+# PDF
+*.pdf
+
 # System Files
 .DS_Store
 .DS_Store?

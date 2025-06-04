@@ -674,3 +674,380 @@ function closeAllPostsModal() {
   modal.classList.remove('active');
   document.body.style.overflow = '';
 }
+
+// ───────────────────────────────
+// Executive Report Modal & Form Handling
+// ───────────────────────────────
+
+function initializeExecutiveReport() {
+  const requestBtn = document.getElementById('request-report-btn');
+  const modal = document.getElementById('report-modal');
+  const closeBtn = document.getElementById('report-modal-close');
+  const cancelBtn = document.getElementById('form-cancel');
+  const successCloseBtn = document.getElementById('success-close');
+  const form = document.getElementById('report-form');
+  
+  if (!requestBtn || !modal || !form) return;
+  
+  // Open modal
+  requestBtn.addEventListener('click', () => {
+    openReportModal();
+  });
+  
+  // Close modal handlers
+  [closeBtn, cancelBtn, successCloseBtn].forEach(btn => {
+    if (btn) {
+      btn.addEventListener('click', () => {
+        closeReportModal();
+      });
+    }
+  });
+  
+  // Close on backdrop click
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      closeReportModal();
+    }
+  });
+  
+  // Close on Escape key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal.classList.contains('active')) {
+      closeReportModal();
+    }
+  });
+  
+  // Form submission
+  form.addEventListener('submit', handleReportFormSubmission);
+  
+  // Real-time form validation
+  initializeFormValidation();
+}
+
+function openReportModal() {
+  const modal = document.getElementById('report-modal');
+  const formContainer = document.getElementById('report-form');
+  const successContainer = document.getElementById('report-success');
+  
+  // Reset modal state
+  formContainer.style.display = 'block';
+  successContainer.style.display = 'none';
+  
+  // Reset form
+  document.getElementById('report-form').reset();
+  clearFormErrors();
+  
+  // Open modal
+  modal.classList.add('active');
+  document.body.style.overflow = 'hidden';
+  
+  // Focus first input
+  setTimeout(() => {
+    const firstInput = modal.querySelector('input[type="text"], input[type="email"]');
+    if (firstInput) firstInput.focus();
+  }, 150);
+}
+
+function closeReportModal() {
+  const modal = document.getElementById('report-modal');
+  modal.classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+function initializeFormValidation() {
+  const form = document.getElementById('report-form');
+  const inputs = form.querySelectorAll('input[required], select[required], textarea[required]');
+  
+  inputs.forEach(input => {
+    // Validate on blur
+    input.addEventListener('blur', () => validateField(input));
+    
+    // Clear errors on input
+    input.addEventListener('input', () => clearFieldError(input));
+  });
+  
+  // Email specific validation
+  const emailInput = document.getElementById('email');
+  if (emailInput) {
+    emailInput.addEventListener('blur', () => validateEmail(emailInput));
+  }
+  
+  // Phone formatting (optional)
+  const phoneInput = document.getElementById('phone');
+  if (phoneInput) {
+    phoneInput.addEventListener('input', (e) => formatPhoneNumber(e.target));
+  }
+}
+
+function validateField(field) {
+  const value = field.value.trim();
+  const fieldName = field.name;
+  
+  // Clear previous errors
+  clearFieldError(field);
+  
+  // Required field validation
+  if (field.hasAttribute('required') && !value) {
+    showFieldError(field, `${getFieldLabel(fieldName)} is required`);
+    return false;
+  }
+  
+  // Specific validations
+  if (fieldName === 'email' && value) {
+    return validateEmail(field);
+  }
+  
+  if (fieldName === 'firstName' || fieldName === 'lastName') {
+    if (value && value.length < 2) {
+      showFieldError(field, 'Name must be at least 2 characters');
+      return false;
+    }
+  }
+  
+  if (fieldName === 'company' && value && value.length < 2) {
+    showFieldError(field, 'Company name must be at least 2 characters');
+    return false;
+  }
+  
+  return true;
+}
+
+function validateEmail(emailField) {
+  const email = emailField.value.trim();
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  
+  if (email && !emailRegex.test(email)) {
+    showFieldError(emailField, 'Please enter a valid email address');
+    return false;
+  }
+  
+  return true;
+}
+
+function formatPhoneNumber(phoneField) {
+  let value = phoneField.value.replace(/\D/g, '');
+  
+  // Format based on length (basic international support)
+  if (value.length >= 10) {
+    // UK format: +44 7XXX XXX XXX
+    if (value.startsWith('44') && value.length <= 13) {
+      value = value.replace(/(\d{2})(\d{4})(\d{3})(\d{3})/, '+$1 $2 $3 $4');
+    }
+    // US format: (XXX) XXX-XXXX
+    else if (value.length === 10) {
+      value = value.replace(/(\d{3})(\d{3})(\d{4})/, '($1) $2-$3');
+    }
+    // International format: +X XXX XXX XXXX
+    else if (value.length > 10) {
+      value = '+' + value;
+    }
+  }
+  
+  phoneField.value = value;
+}
+
+function showFieldError(field, message) {
+  clearFieldError(field);
+  
+  field.classList.add('error');
+  field.style.borderColor = '#ef4444';
+  
+  const errorDiv = document.createElement('div');
+  errorDiv.className = 'field-error';
+  errorDiv.style.cssText = `
+    color: #ef4444;
+    font-size: 0.75rem;
+    margin-top: 4px;
+    font-weight: 500;
+  `;
+  errorDiv.textContent = message;
+  
+  field.parentNode.appendChild(errorDiv);
+}
+
+function clearFieldError(field) {
+  field.classList.remove('error');
+  field.style.borderColor = '';
+  
+  const existingError = field.parentNode.querySelector('.field-error');
+  if (existingError) {
+    existingError.remove();
+  }
+}
+
+function clearFormErrors() {
+  const form = document.getElementById('report-form');
+  const errors = form.querySelectorAll('.field-error');
+  const errorFields = form.querySelectorAll('.error');
+  
+  errors.forEach(error => error.remove());
+  errorFields.forEach(field => {
+    field.classList.remove('error');
+    field.style.borderColor = '';
+  });
+}
+
+function getFieldLabel(fieldName) {
+  const labels = {
+    firstName: 'First Name',
+    lastName: 'Last Name',
+    email: 'Email Address',
+    phone: 'Phone Number',
+    company: 'Company/Organization',
+    title: 'Job Title',
+    role: 'Role/Interest',
+    interest: 'Specific Interest',
+    message: 'Additional Details',
+    consent: 'Consent'
+  };
+  
+  return labels[fieldName] || fieldName;
+}
+
+async function handleReportFormSubmission(e) {
+  e.preventDefault();
+  
+  const form = e.target;
+  const submitBtn = document.getElementById('form-submit');
+  const submitText = submitBtn.querySelector('.submit-text');
+  const submitLoading = submitBtn.querySelector('.submit-loading');
+  
+  // Validate all fields
+  const isValid = validateForm(form);
+  if (!isValid) {
+    // Scroll to first error
+    const firstError = form.querySelector('.error');
+    if (firstError) {
+      firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      firstError.focus();
+    }
+    return;
+  }
+  
+  // Show loading state
+  submitBtn.disabled = true;
+  submitText.style.display = 'none';
+  submitLoading.style.display = 'flex';
+  
+  try {
+    // Collect form data
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData.entries());
+    
+    // Add timestamp and additional metadata
+    data.timestamp = new Date().toISOString();
+    data.userAgent = navigator.userAgent;
+    data.referrer = document.referrer;
+    
+    // Determine API URL based on environment
+    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const apiUrl = isLocalhost ? 'http://localhost:8787/api/request-report' : '/api/request-report';
+    
+    // Submit to Cloudflare Worker
+    const response = await fetch(apiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data)
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const result = await response.json();
+    
+    if (result.success) {
+      showSuccessMessage();
+      
+      // Track successful submission (if analytics available)
+      if (typeof gtag !== 'undefined') {
+        gtag('event', 'executive_report_request', {
+          event_category: 'engagement',
+          event_label: data.role,
+          value: 1
+        });
+      }
+    } else {
+      throw new Error(result.error || 'Submission failed');
+    }
+    
+  } catch (error) {
+    console.error('Form submission error:', error);
+    showSubmissionError(error.message);
+  } finally {
+    // Reset button state
+    submitBtn.disabled = false;
+    submitText.style.display = 'inline';
+    submitLoading.style.display = 'none';
+  }
+}
+
+function validateForm(form) {
+  const requiredFields = form.querySelectorAll('input[required], select[required], textarea[required]');
+  let isValid = true;
+  
+  requiredFields.forEach(field => {
+    if (!validateField(field)) {
+      isValid = false;
+    }
+  });
+  
+  // Special validation for consent checkbox
+  const consentField = document.getElementById('consent');
+  if (consentField && !consentField.checked) {
+    showFieldError(consentField, 'You must agree to the terms to continue');
+    isValid = false;
+  }
+  
+  return isValid;
+}
+
+function showSuccessMessage() {
+  const formContainer = document.getElementById('report-form');
+  const successContainer = document.getElementById('report-success');
+  
+  formContainer.style.display = 'none';
+  successContainer.style.display = 'block';
+  
+  // Scroll to top of modal
+  const modalContent = document.querySelector('.report-modal-content');
+  modalContent.scrollTop = 0;
+}
+
+function showSubmissionError(message) {
+  // Create or update error message
+  let errorDiv = document.querySelector('.form-submission-error');
+  
+  if (!errorDiv) {
+    errorDiv = document.createElement('div');
+    errorDiv.className = 'form-submission-error';
+    errorDiv.style.cssText = `
+      background: #fef2f2;
+      border: 1px solid #fca5a5;
+      color: #dc2626;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      margin-bottom: 1rem;
+      font-size: 0.875rem;
+      line-height: 1.5;
+    `;
+    
+    const formActions = document.querySelector('.form-actions');
+    formActions.parentNode.insertBefore(errorDiv, formActions);
+  }
+  
+  errorDiv.innerHTML = `
+    <strong>Submission Error:</strong> ${message}
+    <br><small>Please try again, or contact ian@ianyeo.com directly if the problem persists.</small>
+  `;
+  
+  // Scroll error into view
+  errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+// Initialize when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+  initializeExecutiveReport();
+});

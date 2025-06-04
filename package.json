@@ -1,0 +1,41 @@
+{
+  "name": "ianyeo-com",
+  "version": "1.0.0",
+  "description": "Ian Yeo's executive portfolio website with gated report access",
+  "main": "worker.js",
+  "scripts": {
+    "dev": "wrangler pages dev .",
+    "deploy": "wrangler deploy",
+    "dev:worker": "wrangler dev",
+    "deploy:worker": "wrangler deploy worker.js",
+    "setup": "npm run setup:kv && npm run setup:r2",
+    "setup:kv": "wrangler kv namespace create REPORT_ACCESS && wrangler kv namespace create REPORT_ACCESS --preview",
+    "setup:r2": "wrangler r2 bucket create executive-reports && wrangler r2 bucket create executive-reports-preview",
+    "setup:zoho": "node setup-zoho.js",
+    "list:kv": "wrangler kv namespace list",
+    "upload:report": "wrangler r2 object put executive-reports/executive-report.pdf --file",
+    "list:buckets": "wrangler r2 bucket list",
+    "check:report": "wrangler r2 object get executive-reports/executive-report.pdf --file downloaded-report.pdf",
+    "delete:report": "wrangler r2 object delete executive-reports/executive-report.pdf",
+    "test:email": "node test-email.js",
+    "logs": "wrangler tail"
+  },
+  "keywords": [
+    "executive",
+    "portfolio",
+    "cloudflare",
+    "workers",
+    "r2",
+    "zoho",
+    "gated-content"
+  ],
+  "author": "Ian Yeo <ian@ianyeo.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20231025.0",
+    "wrangler": "^4.19.1"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}

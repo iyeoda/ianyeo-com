@@ -1,0 +1,37 @@
+# Cloudflare Workers configuration for ianyeo.com
+
+name = "ianyeo-com"
+compatibility_date = "2024-01-01"
+main = "worker.js"
+
+# KV Namespace for storing report access data
+[[kv_namespaces]]
+binding = "REPORT_ACCESS"
+id = "920339f6aedd41b09a20d58d415b81d7" 
+preview_id = "2985eb457cdd46c4a637d41f8a419983" 
+
+# R2 Bucket for storing executive reports
+[[r2_buckets]]
+binding = "EXECUTIVE_REPORTS"
+bucket_name = "executive-reports"  # Replace with your actual R2 bucket name
+preview_bucket_name = "executive-reports-preview"  # Optional: for development
+
+# Environment variables (set via dashboard or wrangler secret)
+[vars]
+SITE_URL = "https://ianyeo.com"
+REPORT_FILE_KEY = "executive-report.pdf"  # File key in R2 bucket
+ZOHO_FROM_EMAIL = "ian@ianyeo.com"  # Your verified Zoho sender email
+
+# Routes for handling API requests
+[[routes]]
+pattern = "ianyeo.com/api/*"
+zone_name = "ianyeo.com"
+
+[[routes]]
+pattern = "www.ianyeo.com/api/*"
+zone_name = "ianyeo.com"
+
+# Development settings
+[env.development]
+name = "ianyeo-com-dev"
+vars = { SITE_URL = "http://localhost:8787", REPORT_FILE_KEY = "executive-report-dev.pdf" } 
