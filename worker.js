@@ -235,7 +235,7 @@ async function sendReportEmail(env, formData, downloadUrl, expiresAt) {
           name: formData.firstName || ''
         }
       }],
-      subject: 'Your Executive Leadership Report - Secure Access',
+      subject: 'Your CEO Executive Brief for Ian Yeo - Secure Access',
       htmlbody: createEmailTemplate(formData, downloadUrl, expiresAt),
       textbody: createTextEmailTemplate(formData, downloadUrl, expiresAt)
     };
@@ -273,14 +273,14 @@ function createEmailTemplate(formData, downloadUrl, expiresAt) {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Executive Leadership Report Access</title>
+  <title>CEO Executive Brief Access for Ian Yeo</title>
 </head>
 <body style="font-family: Inter, -apple-system, BlinkMacSystemFont, sans-serif; line-height: 1.6; color: #334155; margin: 0; padding: 0; background-color: #f8fafc;">
   <div style="max-width: 600px; margin: 0 auto; background: white; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
     
     <!-- Header -->
     <div style="background: linear-gradient(135deg, #1e40af 0%, #9333ea 100%); padding: 32px; text-align: center;">
-      <h1 style="color: white; margin: 0; font-size: 28px; font-weight: 700;">Executive Leadership Report</h1>
+      <h1 style="color: white; margin: 0; font-size: 28px; font-weight: 700;">CEO Executive Brief for Ian Yeo</h1>
       <p style="color: rgba(255, 255, 255, 0.9); margin: 8px 0 0; font-size: 16px;">Secure Access Granted</p>
     </div>
     
@@ -321,7 +321,7 @@ function createEmailTemplate(formData, downloadUrl, expiresAt) {
       
       <p style="margin: 24px 0 0;">I look forward to discussing potential opportunities with you. Please feel free to reach out directly if you have any questions.</p>
       
-      <p style="margin: 16px 0 0;">Best regards,<br><strong>Ian Yeo</strong><br>Technology Leader & Board Advisor</p>
+      <p style="margin: 16px 0 0;">Best regards,<br><strong>Ian Yeo</strong><br>Founder & Former CEO of Operance (Acquired)</p>
     </div>
     
     <!-- Footer -->
@@ -362,7 +362,7 @@ I look forward to discussing potential opportunities with you. Please feel free 
 
 Best regards,
 Ian Yeo
-Technology Leader & Board Advisor
+Founder & Former CEO of Operance (Acquired)
 
 ianyeo.com | ian@ianyeo.com | linkedin.com/in/iankyeo`;
 }
