@@ -1,4 +1,3 @@
-
 /* ───────────────────────────────
    1. Design System & Variables
 ─────────────────────────────── */
@@ -605,7 +604,7 @@ section {
 
 .tech-stack-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  grid-template-columns: repeat(5, 1fr);
   gap: var(--spacing-xl);
   margin-top: var(--spacing-2xl);
 }
@@ -658,9 +657,11 @@ section {
   transition: var(--transition-normal);
 }
 
-.tech-icon svg {
-  width: 100%;
-  height: 100%;
+.tech-icon svg,
+.tech-icon img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
   transition: var(--transition-normal);
 }
 
@@ -707,23 +708,15 @@ section {
 }
 
 /* Responsive adjustments for tech stack */
-@media (max-width: 768px) {
+@media (max-width: 900px) {
   .tech-stack-grid {
-    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-    gap: var(--spacing-lg);
+    grid-template-columns: repeat(2, 1fr);
   }
-  
-  .tech-item {
-    padding: var(--spacing-md);
-  }
-  
-  .tech-icon {
-    width: 40px;
-    height: 40px;
-  }
-  
-  .tech-name {
-    font-size: 0.75rem;
+}
+
+@media (max-width: 600px) {
+  .tech-stack-grid {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -1549,7 +1542,7 @@ section {
 
 .tech-stack-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  grid-template-columns: repeat(5, 1fr);
   gap: var(--spacing-xl);
   margin-top: var(--spacing-2xl);
 }
@@ -1602,9 +1595,11 @@ section {
   transition: var(--transition-normal);
 }
 
-.tech-icon svg {
-  width: 100%;
-  height: 100%;
+.tech-icon svg,
+.tech-icon img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
   transition: var(--transition-normal);
 }
 
@@ -1651,23 +1646,15 @@ section {
 }
 
 /* Responsive adjustments for tech stack */
-@media (max-width: 768px) {
+@media (max-width: 900px) {
   .tech-stack-grid {
-    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-    gap: var(--spacing-lg);
+    grid-template-columns: repeat(2, 1fr);
   }
-  
-  .tech-item {
-    padding: var(--spacing-md);
-  }
-  
-  .tech-icon {
-    width: 40px;
-    height: 40px;
-  }
-  
-  .tech-name {
-    font-size: 0.75rem;
+}
+
+@media (max-width: 600px) {
+  .tech-stack-grid {
+    grid-template-columns: 1fr;
   }
 }
 
