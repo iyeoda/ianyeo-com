@@ -1,6 +1,6 @@
 ---
 title: "Leadership Lessons from Scaling a PropTech Startup to 470% Growth"
-date: "2025-01-01"
+date: "2025-02-01"
 category: "Leadership"
 excerpt: "Key insights from my experience as CEO building and scaling a PropTech company from concept to acquisition, including the strategic decisions that drove 470% revenue growth."
 ---

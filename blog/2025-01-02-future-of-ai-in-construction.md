@@ -1,6 +1,6 @@
 ---
 title: "The Future of AI in Construction: Beyond Building Information Management"
-date: "2025-01-02"
+date: "2025-03-12"
 category: "AI & Innovation"
 excerpt: "Exploring how artificial intelligence is transforming the construction industry beyond traditional BIM applications, and what leaders need to know about the next wave of innovation."
 ---
