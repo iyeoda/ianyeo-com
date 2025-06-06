@@ -421,12 +421,73 @@ function openBlogModal(post) {
   modalDate.textContent = formatDate(post.date);
   modalContent.innerHTML = parseMarkdownToHTML(post.content);
   
+  // SEO Enhancement: Update page title and meta description for blog posts
+  const originalTitle = document.title;
+  const originalDescription = document.querySelector('meta[name="description"]').content;
+  
+  // Update title for better SEO
+  document.title = `${post.title} | Ian Yeo - PropTech CEO`;
+  
+  // Update meta description
+  const metaDescription = document.querySelector('meta[name="description"]');
+  metaDescription.content = post.excerpt;
+  
+  // Update Open Graph tags
+  const ogTitle = document.querySelector('meta[property="og:title"]');
+  const ogDescription = document.querySelector('meta[property="og:description"]');
+  if (ogTitle) ogTitle.content = post.title;
+  if (ogDescription) ogDescription.content = post.excerpt;
+  
+  // Update Twitter Card tags
+  const twitterTitle = document.querySelector('meta[name="twitter:title"]');
+  const twitterDescription = document.querySelector('meta[name="twitter:description"]');
+  if (twitterTitle) twitterTitle.content = post.title;
+  if (twitterDescription) twitterDescription.content = post.excerpt;
+  
+  // Store original values for restoration
+  modal.dataset.originalTitle = originalTitle;
+  modal.dataset.originalDescription = originalDescription;
+  
+  // Track blog post view for SEO analytics
+  if (typeof gtag !== 'undefined') {
+    gtag('event', 'blog_post_view', {
+      event_category: 'content',
+      event_label: post.title,
+      content_group1: 'Blog',
+      content_group2: post.category,
+      value: 1
+    });
+  }
+  
   modal.classList.add('active');
   document.body.style.overflow = 'hidden';
 }
 
 function closeBlogModal() {
   const modal = document.getElementById('blog-modal');
+  
+  // SEO Enhancement: Restore original meta tags
+  if (modal.dataset.originalTitle) {
+    document.title = modal.dataset.originalTitle;
+  }
+  
+  if (modal.dataset.originalDescription) {
+    const metaDescription = document.querySelector('meta[name="description"]');
+    metaDescription.content = modal.dataset.originalDescription;
+    
+    // Restore Open Graph tags
+    const ogTitle = document.querySelector('meta[property="og:title"]');
+    const ogDescription = document.querySelector('meta[property="og:description"]');
+    if (ogTitle) ogTitle.content = "Ian Yeo – Founder & Former CEO of Operance (Acquired)";
+    if (ogDescription) ogDescription.content = modal.dataset.originalDescription;
+    
+    // Restore Twitter Card tags
+    const twitterTitle = document.querySelector('meta[name="twitter:title"]');
+    const twitterDescription = document.querySelector('meta[name="twitter:description"]');
+    if (twitterTitle) twitterTitle.content = "Ian Yeo – Founder & Former CEO of Operance (Acquired)";
+    if (twitterDescription) twitterDescription.content = modal.dataset.originalDescription;
+  }
+  
   modal.classList.remove('active');
   document.body.style.overflow = '';
 }

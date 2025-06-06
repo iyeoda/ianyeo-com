@@ -1,0 +1,20 @@
+User-agent: *
+Allow: /
+
+# Allow all CSS and JS files for proper rendering
+Allow: /style.css
+Allow: /script.js
+Allow: /assets/
+
+# Sitemap location
+Sitemap: https://ianyeo.com/sitemap.xml
+
+# Block sensitive areas
+Disallow: /api/
+Disallow: /.git/
+Disallow: /node_modules/
+Disallow: /test/
+Disallow: /.wrangler/
+
+# Crawl delay (optional, helps with server load)
+Crawl-delay: 1 

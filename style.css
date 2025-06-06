@@ -65,6 +65,75 @@
 }
 
 /* ───────────────────────────────
+   SEO & Performance Optimizations
+─────────────────────────────── */
+
+/* Critical CSS for above-the-fold content */
+.hero {
+  /* Prevent layout shift */
+  contain: layout style paint;
+  min-height: 100vh;
+  will-change: transform;
+}
+
+/* Optimize image loading for Core Web Vitals */
+img {
+  /* Prevent layout shift */
+  max-width: 100%;
+  height: auto;
+  /* Improve loading performance */
+  loading: lazy;
+  decoding: async;
+}
+
+/* Critical images should override lazy loading */
+img[loading="eager"] {
+  loading: eager;
+}
+
+/* Optimize font display for performance */
+@font-face {
+  font-family: 'Inter';
+  font-display: swap; /* Prevent invisible text during font load */
+}
+
+/* Reduce motion for accessibility and performance */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* GPU acceleration for smooth animations */
+.hero-canvas,
+.hero-content,
+.metric-card,
+.timeline-item {
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+/* Optimize background images */
+.hero::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-attachment: fixed;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  z-index: -1;
+}
+
+/* ───────────────────────────────
    2. Reset & Base Styles
 ─────────────────────────────── */
 *, *::before, *::after {
@@ -928,11 +997,6 @@ section {
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: var(--spacing-md);
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
 }
 
 .blog-actions {
