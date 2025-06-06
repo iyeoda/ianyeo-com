@@ -38,6 +38,9 @@ logs/
 .temp/
 tmp/
 
+# QR Code
+qr_code_gen/
+
 # PDF
 *.pdf
 

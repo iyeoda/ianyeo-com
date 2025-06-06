@@ -1195,6 +1195,10 @@ section {
    9. Responsive Design
 ─────────────────────────────── */
 @media (max-width: 768px) {
+  .hero {
+    padding-top: var(--spacing-2xl); /* Add space from top of screen */
+  }
+  
   .hero-content {
     padding: 0 var(--spacing-md);
   }
@@ -1205,6 +1209,7 @@ section {
   }
   
   .hero-profile {
+    margin-top: var(--spacing-lg); /* Additional top margin for mobile */
     margin-bottom: var(--spacing-xl);
   }
   

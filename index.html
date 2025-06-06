@@ -29,6 +29,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Preload critical image for faster loading -->
+  <link rel="preload" as="image" href="/assets/ian-yeo-profile.jpg" fetchpriority="high">
+  
   <link rel="stylesheet" href="style.css">
 
   <script type="application/ld+json">
@@ -51,7 +55,7 @@
     <div class="hero-content">
       <div class="hero-profile">
         <div class="hero-avatar">
-          <img src="/assets/ian-yeo-profile.jpg" alt="Ian Yeo - Founder & Former CEO of Operance (Acquired)" loading="eager">
+          <img src="/assets/ian-yeo-profile.jpg" alt="Ian Yeo - Founder & Former CEO of Operance (Acquired)" loading="eager" fetchpriority="high">
         </div>
       </div>
       <h1 class="hero-title">Ian Yeo</h1>
