@@ -27,8 +27,17 @@ jobs:
         with:
           node-version: '18'
           
-      - name: Install dependencies
-        run: npm ci
+      - name: Install dependencies (if needed)
+        run: |
+          if [ -f package.json ]; then
+            if [ -f package-lock.json ]; then
+              npm ci
+            else
+              npm install
+            fi
+          else
+            echo "No package.json found, skipping dependency installation"
+          fi
         
       - name: Deploy Worker
         uses: cloudflare/wrangler-action@v3
