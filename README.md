@@ -1,78 +1,95 @@
-# Ian Yeo – Personal Site
+# Ian Yeo – Personal Site
 
-This repo contains the static website that showcases Ian Yeo’s leadership profile. It is designed to be **zero‑backend**, deployable on **Cloudflare Pages** for £0 / year, and automatically redeployed from GitHub with a simple GitHub Actions workflow.
+[![Cloudflare Pages](https://img.shields.io/badge/Cloudflare-Pages-F38020?style=flat&logo=cloudflare&logoColor=white)](https://pages.cloudflare.com)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Website](https://img.shields.io/website?url=https%3A%2F%2Fianyeo.com)](https://ianyeo.com)
 
----
+A zero-backend personal website showcasing Ian Yeo's leadership profile. Deployed on Cloudflare Pages for £0/year with automatic GitHub Actions deployment.
 
-## 📂 Project structure
+## 📋 Table of Contents
+
+- [Project Structure](#-project-structure)
+- [Local Development](#-local-development)
+- [Deployment](#-deployment)
+- [GitHub Actions](#-automatic-deploy-with-github-actions)
+- [Extras](#-extras)
+- [Cost Summary](#-cost-summary)
+
+## 📂 Project Structure
 
 ```text
 .
-├── index.html   # main page (updated 2025‑06‑02)
-├── assets/      # any images, CSS, JS you add later
-└── README.md    # you are here
+├── index.html   # Main page (updated 2025‑06‑02)
+├── assets/      # Static assets (images, CSS, JS)
+└── README.md    # Documentation
 ```
 
----
+## 🛠 Local Development
 
-## 🛠 Local development
+### Prerequisites
 
-Prereqs:
+- [Node.js ≥ 16](https://nodejs.org/) (for build tooling & Wrangler)
+- Cloudflare Wrangler 2 CLI
 
-* [Node.js >= 16](https://nodejs.org/) (build tooling & Wrangler)
-* Cloudflare **Wrangler 2** CLI
+### Quick Start
 
 ```bash
-npm i -g wrangler              # one‑time install
-wrangler pages dev .           # ⚡ local server at http://localhost:8787
+# Install Wrangler CLI (one-time setup)
+npm i -g wrangler
+
+# Start local development server
+wrangler pages dev .  # ⚡ http://localhost:8787
 ```
 
-Wrangler provides live‑reload and the same headers you’ll see on Cloudflare’s edge, so what you test locally is what ships.
+Wrangler provides live-reload and the same headers you'll see on Cloudflare's edge, ensuring local testing matches production.
 
-### Alternative quick servers (if you don’t want Wrangler)
+### Alternative Development Servers
 
 ```bash
-# Python 3.x minimal
+# Python 3.x minimal server
 python -m http.server 8000
 
-# npm 'serve' package (on‑demand)
+# npm 'serve' package
 npx serve .
 ```
 
----
+## 🚀 Deployment
 
-## 🚀 Deploying to **Cloudflare Pages** (manual)
+### Manual Deployment to Cloudflare Pages
 
-1. **Create project** → *Pages* in the Cloudflare dashboard.
-2. **Connect to this GitHub repo**.
-3. **Build settings**
+1. **Create Project**
+   - Go to Cloudflare Dashboard → Pages
+   - Connect to this GitHub repository
 
-   * **Framework preset:** **None** (static)
-   * **Build command:** *(leave blank)*
-   * **Output directory:** `/`
-4. **Save & Deploy** – Cloudflare assigns `https://<project>.pages.dev`.
-5. **Custom domain**
+2. **Configure Build Settings**
+   - Framework preset: None (static)
+   - Build command: (leave blank)
+   - Output directory: `/`
 
-   * Pages → **Custom Domains** → *Add* → `ianyeo.com`.
-   * In **DNS**, add CNAME records:
+3. **Deploy**
+   - Click "Save & Deploy"
+   - Cloudflare assigns `https://<project>.pages.dev`
 
-     | Name  | Target                |
-     | ----- | --------------------- |
-     | `@`   | `<project>.pages.dev` |
-     | `www` | `<project>.pages.dev` |
-6. Wait \~5 minutes for the free edge TLS cert → production ready.
+4. **Setup Custom Domain**
+   - Pages → Custom Domains → Add → `ianyeo.com`
+   - Add DNS CNAME records:
 
-> **Tip** Turn on **Rules → Caching → Cache Rules → Cache Everything** to serve stale copies if the origin blips.
+   | Name  | Target                |
+   |-------|----------------------|
+   | `@`   | `<project>.pages.dev`|
+   | `www` | `<project>.pages.dev`|
 
----
+5. Wait ~5 minutes for edge TLS certificate
 
-## 🤖 Automatic deploy with **GitHub Actions**
+> 💡 **Pro Tip**: Enable "Rules → Caching → Cache Rules → Cache Everything" for better reliability.
 
-The workflow below rebuilds & redeploys the site every time you push to `main`.
+## 🤖 Automatic Deploy with GitHub Actions
+
+The workflow automatically rebuilds and redeploys on pushes to `main`:
 
 ```yaml
 # .github/workflows/deploy.yml
-name: Deploy to Cloudflare Pages
+name: Deploy to Cloudflare Pages
 
 on:
   push:
@@ -87,44 +104,42 @@ jobs:
         with:
           apiToken: ${{ secrets.CF_API_TOKEN }}
           accountId: ${{ secrets.CF_ACCOUNT_ID }}
-          projectName: ian-yeo-site       # must match your Pages project
-          directory: .                    # path to static files
+          projectName: ian-yeo-site
+          directory: .
 ```
 
-### Setting secrets
+### Setting Up Secrets
 
-1. In Cloudflare → **My Profile → API Tokens → Create Token**.
+1. **Create API Token**
+   - Cloudflare → My Profile → API Tokens → Create Token
+   - Select template: "Pages – Edit"
+   - Copy the generated token
 
-   * Template: **Pages – Edit**.
-2. Copy the token.
-3. In GitHub → *Repo* → **Settings → Secrets → Actions**.
+2. **Add GitHub Secrets**
+   - GitHub → Repo → Settings → Secrets → Actions
+   - Add:
+     - `CF_API_TOKEN`: Your Cloudflare API token
+     - `CF_ACCOUNT_ID`: Your Cloudflare account ID
 
-   * Add
+Push to `main` → site updates in ~30 seconds.
 
-     * `CF_API_TOKEN`: *paste token*
-     * `CF_ACCOUNT_ID`: *found in any Cloudflare API call or dashboard*
+## 📈 Extras
 
-Push to `main` → live site updates in \~30 sec.
+| Feature          | Implementation                                    |
+|------------------|--------------------------------------------------|
+| Analytics        | Enable Web Analytics in Cloudflare dashboard     |
+| Staging Previews | Add "preview" branch to Production Branches      |
+| Custom 404       | Create `404.html` for custom error page          |
+| Edge Fallback    | Deploy Worker (`wrangler deploy`) for fallback   |
+
+## 💸 Cost Summary
+
+| Item                              | Yearly £ |
+|-----------------------------------|----------|
+| Cloudflare Pages (hosting + BW)   | **0**    |
+| Domain (`ianyeo.com`)            | ~10      |
+| **Total**                        | **≈10**  |
 
 ---
 
-## 📈 Extras (optional)
-
-| Need             | How                                                                      |
-| ---------------- | ------------------------------------------------------------------------ |
-| Analytics        | Turn on **Web Analytics** in Cloudflare dashboard (free, privacy‑first). |
-| Staging previews | Add a “preview” branch to Pages **Production Branches**.                 |
-| Fancy 404 page   | Create `404.html`; Cloudflare will serve it automatically.               |
-| Edge fallback    | Deploy a tiny Worker (`wrangler deploy`) and route `ianyeo.com/*` to it. |
-
----
-
-## 💸 Cost summary
-
-| Item                                 | Yearly £ |
-| ------------------------------------ | -------- |
-| Cloudflare Pages hosting + bandwidth | **0**    |
-| Domain (`ianyeo.com`)                | \~10     |
-| **Total**                            | **≈10**  |
-
-And that’s it—happy shipping! If you run into snags, open an issue or ping me.
+Need help? Open an issue or reach out directly!
