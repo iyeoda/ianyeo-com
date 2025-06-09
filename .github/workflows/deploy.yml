@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
 jobs:
-  deploy:
+  deploy-pages:
     runs-on: ubuntu-latest
     permissions: { contents: read }
     steps:
@@ -15,3 +15,31 @@ jobs:
           accountId: ${{ secrets.CF_ACCOUNT_ID }}
           projectName: ianyeo-com
           directory: .
+
+  deploy-worker:
+    runs-on: ubuntu-latest
+    permissions: { contents: read }
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Deploy Worker
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CF_API_TOKEN }}
+          accountId: ${{ secrets.CF_ACCOUNT_ID }}
+          command: deploy
+          secrets: |
+            ZOHO_API_KEY
+            TURNSTILE_SECRET_KEY
+        env:
+          ZOHO_API_KEY: ${{ secrets.ZOHO_API_KEY }}
+          TURNSTILE_SECRET_KEY: ${{ secrets.TURNSTILE_SECRET_KEY }}
+          
