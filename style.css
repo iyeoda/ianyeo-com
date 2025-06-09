@@ -2265,7 +2265,7 @@ section {
 }
 
 .form-actions .btn:active {
-  transform: none;
+  transform: scale(0.98);
 }
 
 .submit-loading {
@@ -2399,4 +2399,23 @@ section {
   .report-modal-title {
     font-size: 1.25rem;
   }
+}
+
+/* Cloudflare Turnstile Styling */
+.cf-turnstile {
+  margin: var(--spacing-md) 0;
+}
+
+.turnstile-help {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin-top: var(--spacing-sm);
+  line-height: 1.4;
+}
+
+.turnstile-error {
+  color: #ef4444;
+  font-size: 0.75rem;
+  margin-top: var(--spacing-sm);
+  font-weight: 500;
 }

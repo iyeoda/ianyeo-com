@@ -461,4 +461,93 @@ Your professional executive report gated access system is now configured and rea
 ✅ **Build relationships** with follow-up opportunities
 ✅ **Demonstrate expertise** with technical sophistication
 
-The system positions your executive report as premium content while building a qualified contact database for your executive search and business development efforts. 
+The system positions your executive report as premium content while building a qualified contact database for your executive search and business development efforts.
+
+## 6. Configure Cloudflare Turnstile (Bot Protection)
+
+Your form now includes Cloudflare Turnstile for bot protection. This helps prevent spam and ensures only legitimate requests.
+
+### Set Up Turnstile
+
+1. **Create Turnstile Site**:
+   - Go to [Cloudflare Dashboard](https://dash.cloudflare.com)
+   - Navigate to "Turnstile" (if not visible, enable it in your account)
+   - Click "Add Site"
+   - Enter your domain: `ianyeo.com`
+   - Choose "Managed" mode for automatic challenge
+   - Click "Create"
+
+2. **Get Your Keys**:
+   - Copy the **Site Key** (starts with `0x4...`)
+   - Copy the **Secret Key** (starts with `0x2...`)
+
+3. **Update Configuration**:
+   
+   **Update HTML** (`index.html`):
+   Replace the test site key with your real one:
+   ```html
+   <div class="cf-turnstile" 
+        data-sitekey="YOUR_ACTUAL_SITE_KEY_HERE"
+        ...>
+   ```
+   
+   **Update Worker Environment**:
+   ```bash
+   # Set the secret key (used for server-side verification)
+   wrangler secret put TURNSTILE_SECRET_KEY
+   # Enter your secret key when prompted
+   
+   # Update wrangler.toml with your site key
+   # Replace TURNSTILE_SITE_KEY value in the [vars] section
+   ```
+
+4. **Test the Integration**:
+   - Open your website in a private/incognito browser
+   - Try submitting the executive report form
+   - You should see the Turnstile challenge appear
+   - Verify the form only submits after completing the challenge
+
+### Development Testing
+
+The current configuration uses Cloudflare's test key (`0x4AAAAAAABkPtOo4wr4djKj`) which always passes verification. This is perfect for development but remember to replace it with your production keys before going live.
+
+### Quick Test Page
+
+Use the included `test-turnstile.html` file to quickly test your Turnstile configuration:
+
+```bash
+# Serve the test file locally
+python3 -m http.server 8080
+# Or use any local server of your choice
+
+# Then visit: http://localhost:8080/test-turnstile.html
+```
+
+This test page will show you:
+- ✅ If Turnstile loads correctly
+- ✅ If the verification widget appears
+- ✅ If tokens are generated successfully
+- ❌ Any configuration errors
+
+## 7. Final Testing
+
+1. **Complete Form Test**:
+   - Go to your website
+   - Click "Request Full CEO Executive Brief"
+   - Fill out the form completely
+   - Complete the Turnstile verification
+   - Submit the form
+   - Check your email for the secure download link
+
+2. **Download Test**:
+   - Click the download link in the email
+   - Verify the PDF downloads correctly
+   - Test the download limits (try downloading 4 times)
+   - Test link expiration (if possible)
+
+3. **Analytics Check**:
+   - Check Cloudflare Worker logs for successful requests
+   - Verify ZeptoMail delivery logs
+   - Monitor R2 storage metrics
+
+## 8. Go Live Checklist 

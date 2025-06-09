@@ -740,6 +740,51 @@ function closeAllPostsModal() {
 // Executive Report Modal & Form Handling
 // ───────────────────────────────
 
+// Global Turnstile state
+let turnstileToken = null;
+let turnstileWidgetId = null;
+
+// Turnstile Callbacks (must be global for Cloudflare to call)
+window.onTurnstileSuccess = function(token) {
+  turnstileToken = token;
+  clearTurnstileError();
+  console.log('Turnstile verification successful');
+};
+
+window.onTurnstileError = function(errorCode) {
+  turnstileToken = null;
+  showTurnstileError('Verification failed. Please try again.');
+  console.error('Turnstile error:', errorCode);
+};
+
+window.onTurnstileExpired = function() {
+  turnstileToken = null;
+  showTurnstileError('Verification expired. Please complete the check again.');
+  console.warn('Turnstile token expired');
+};
+
+function showTurnstileError(message) {
+  // Remove existing error
+  const existingError = document.querySelector('.turnstile-error');
+  if (existingError) {
+    existingError.remove();
+  }
+  
+  // Add new error message
+  const turnstileContainer = document.querySelector('.cf-turnstile').parentNode;
+  const errorDiv = document.createElement('div');
+  errorDiv.className = 'turnstile-error';
+  errorDiv.textContent = message;
+  turnstileContainer.appendChild(errorDiv);
+}
+
+function clearTurnstileError() {
+  const existingError = document.querySelector('.turnstile-error');
+  if (existingError) {
+    existingError.remove();
+  }
+}
+
 function initializeExecutiveReport() {
   const requestBtn = document.getElementById('request-report-btn');
   const modal = document.getElementById('report-modal');
@@ -797,6 +842,18 @@ function openReportModal() {
   // Reset form
   document.getElementById('report-form').reset();
   clearFormErrors();
+  
+  // Reset Turnstile state
+  turnstileToken = null;
+  clearTurnstileError();
+  
+  // Reset Turnstile widget if it exists
+  if (typeof window.turnstile !== 'undefined') {
+    const turnstileElements = document.querySelectorAll('.cf-turnstile');
+    turnstileElements.forEach(element => {
+      window.turnstile.reset(element);
+    });
+  }
   
   // Open modal
   modal.classList.add('active');
@@ -1000,6 +1057,9 @@ async function handleReportFormSubmission(e) {
     data.userAgent = navigator.userAgent;
     data.referrer = document.referrer;
     
+    // Add Turnstile token for server-side verification
+    data['cf-turnstile-response'] = turnstileToken;
+    
     // Determine API URL based on environment
     const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
     const apiUrl = isLocalhost ? 'http://localhost:8787/api/request-report' : '/api/request-report';
@@ -1059,6 +1119,12 @@ function validateForm(form) {
   const consentField = document.getElementById('consent');
   if (consentField && !consentField.checked) {
     showFieldError(consentField, 'You must agree to the terms to continue');
+    isValid = false;
+  }
+  
+  // Validate Turnstile completion
+  if (!turnstileToken) {
+    showTurnstileError('Please complete the security verification to continue.');
     isValid = false;
   }
   

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   
   <!-- Enhanced Title & Description -->
-  <title>Ian Yeo – Founder & Former CEO of Operance (Acquired) | PropTech Executive</title>
+  <title>Ian Yeo – Former CEO Operance (Acquired) | PropTech Executive</title>
   <meta name="description" content="Ian Yeo – Proven CEO with successful PropTech exit. 25+ years transforming construction through AI and innovation. Available for C‑suite, PE/VC operating partner, and board positions.">
   
   <!-- Enhanced SEO Meta Tags -->
@@ -878,6 +878,22 @@
             </div>
           </div>
 
+          <!-- Cloudflare Turnstile Bot Protection -->
+          <div class="form-section">
+            <div class="form-group">
+              <label>Security Verification</label>
+              <div class="cf-turnstile" 
+                   data-sitekey="0x4AAAAAABgg-K_Z-oyhnDrw" 
+                   data-theme="light" 
+                   data-size="normal"
+                   data-callback="onTurnstileSuccess"
+                   data-error-callback="onTurnstileError"
+                   data-expired-callback="onTurnstileExpired">
+              </div>
+              <p class="turnstile-help">Please complete the security check to verify you're human.</p>
+            </div>
+          </div>
+
           <div class="form-actions">
             <button type="button" class="btn btn-secondary" id="form-cancel">Cancel</button>
             <button type="submit" class="btn btn-primary" id="form-submit">
@@ -912,6 +928,9 @@
 
   <!-- Enhanced JavaScript -->
   <script src="script.js"></script>
+
+  <!-- Cloudflare Turnstile for bot protection -->
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 
   <!-- Performance Observer for Core Web Vitals -->
   <script>

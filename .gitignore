@@ -53,3 +53,4 @@ qr_code_gen/
 ehthumbs.db
 Thumbs.db 
 test/index.html
+wrangler.toml

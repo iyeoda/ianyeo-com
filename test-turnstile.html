@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Turnstile Test - Ian Yeo</title>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+    <style>
+        body {
+            font-family: Inter, -apple-system, BlinkMacSystemFont, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f8fafc;
+        }
+        
+        .test-container {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            color: #1e40af;
+            margin-bottom: 20px;
+        }
+        
+        .status {
+            padding: 16px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-weight: 500;
+        }
+        
+        .status.success {
+            background: #dcfce7;
+            border: 1px solid #16a34a;
+            color: #15803d;
+        }
+        
+        .status.error {
+            background: #fef2f2;
+            border: 1px solid #fca5a5;
+            color: #dc2626;
+        }
+        
+        .status.pending {
+            background: #fef3c7;
+            border: 1px solid #f59e0b;
+            color: #92400e;
+        }
+        
+        .cf-turnstile {
+            margin: 20px 0;
+        }
+        
+        .test-info {
+            background: #f0f9ff;
+            border: 1px solid #0ea5e9;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 20px 0;
+            color: #0369a1;
+        }
+        
+        .test-info h3 {
+            margin: 0 0 10px 0;
+            color: #0369a1;
+        }
+        
+        code {
+            background: #e5e7eb;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 Cloudflare Turnstile Test</h1>
+        
+        <div class="test-info">
+            <h3>Test Purpose:</h3>
+            <p>This page tests the Cloudflare Turnstile integration for your executive report form. It uses the same configuration and callbacks as your main site.</p>
+        </div>
+        
+        <div id="status" class="status pending">
+            ⏳ Waiting for Turnstile to load...
+        </div>
+        
+        <div class="cf-turnstile" 
+             data-sitekey="0x4AAAAAAABkPtOo4wr4djKj"
+             data-theme="light" 
+             data-size="normal"
+             data-callback="onTurnstileSuccess"
+             data-error-callback="onTurnstileError"
+             data-expired-callback="onTurnstileExpired">
+        </div>
+        
+        <div id="token-display" style="display: none;">
+            <h3>Token Received:</h3>
+            <code id="token-value"></code>
+            <p style="margin-top: 10px; font-size: 0.9em; color: #6b7280;">
+                This token would be sent to your Cloudflare Worker for verification.
+            </p>
+        </div>
+        
+        <div class="test-info" style="margin-top: 30px;">
+            <h3>Configuration Details:</h3>
+            <ul>
+                <li><strong>Site Key:</strong> <code>0x4AAAAAAABkPtOo4wr4djKj</code> (Cloudflare Test Key)</li>
+                <li><strong>Theme:</strong> Light</li>
+                <li><strong>Size:</strong> Normal</li>
+                <li><strong>Callbacks:</strong> Success, Error, Expired</li>
+            </ul>
+            <p style="margin-top: 10px; font-size: 0.9em;">
+                <strong>Note:</strong> The test key always passes verification. Replace with your production key for live use.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Global Turnstile callbacks (same as in your main site)
+        window.onTurnstileSuccess = function(token) {
+            console.log('✅ Turnstile Success:', token);
+            
+            const status = document.getElementById('status');
+            status.className = 'status success';
+            status.innerHTML = '✅ Verification Successful! Token received.';
+            
+            const tokenDisplay = document.getElementById('token-display');
+            const tokenValue = document.getElementById('token-value');
+            tokenValue.textContent = token.substring(0, 40) + '...';
+            tokenDisplay.style.display = 'block';
+        };
+
+        window.onTurnstileError = function(errorCode) {
+            console.error('❌ Turnstile Error:', errorCode);
+            
+            const status = document.getElementById('status');
+            status.className = 'status error';
+            status.innerHTML = `❌ Verification Failed: ${errorCode}`;
+        };
+
+        window.onTurnstileExpired = function() {
+            console.warn('⏰ Turnstile Expired');
+            
+            const status = document.getElementById('status');
+            status.className = 'status error';
+            status.innerHTML = '⏰ Verification Expired. Please try again.';
+            
+            const tokenDisplay = document.getElementById('token-display');
+            tokenDisplay.style.display = 'none';
+        };
+        
+        // Handle Turnstile widget loading
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                const status = document.getElementById('status');
+                if (status.textContent.includes('Waiting')) {
+                    status.className = 'status pending';
+                    status.innerHTML = '🔄 Turnstile loaded. Please complete the verification above.';
+                }
+            }, 2000);
+        });
+    </script>
+</body>
+</html> 

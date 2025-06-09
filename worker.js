@@ -85,6 +85,17 @@ async function handleReportRequest(request, env) {
       return jsonResponse({ error: 'Consent is required' }, 400);
     }
     
+    // Verify Turnstile token
+    const turnstileToken = data['cf-turnstile-response'];
+    if (!turnstileToken) {
+      return jsonResponse({ error: 'Security verification is required' }, 400);
+    }
+    
+    const turnstileValid = await verifyTurnstile(turnstileToken, env);
+    if (!turnstileValid) {
+      return jsonResponse({ error: 'Security verification failed' }, 400);
+    }
+    
     // Generate secure access token
     const accessToken = await generateSecureToken();
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
@@ -402,6 +413,40 @@ async function generateSecureToken() {
   const array = new Uint8Array(32);
   crypto.getRandomValues(array);
   return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+}
+
+async function verifyTurnstile(token, env) {
+  try {
+    const response = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        secret: env.TURNSTILE_SECRET_KEY,
+        response: token
+      })
+    });
+    
+    if (!response.ok) {
+      console.error('Turnstile verification request failed:', response.status);
+      return false;
+    }
+    
+    const result = await response.json();
+    
+    if (result.success) {
+      console.log('Turnstile verification successful');
+      return true;
+    } else {
+      console.error('Turnstile verification failed:', result['error-codes']);
+      return false;
+    }
+    
+  } catch (error) {
+    console.error('Error verifying Turnstile token:', error);
+    return false;
+  }
 }
 
 function isValidEmail(email) {

@@ -1,6 +1,16 @@
 User-agent: *
 Allow: /
 
+# Explicitly allow major search engine bots
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Slurp
+Allow: /
+
 # Allow all CSS and JS files for proper rendering
 Allow: /style.css
 Allow: /script.js
