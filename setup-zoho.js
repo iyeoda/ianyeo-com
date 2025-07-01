@@ -66,7 +66,7 @@ async function testZohoAPI(apiKey, fromEmail, toEmail) {
       
       <p style="margin: 24px 0 0;">Your professional executive report gateway will help you build a qualified pipeline of opportunities while demonstrating your technical sophistication.</p>
       
-      <p style="margin: 16px 0 0;">Best regards,<br><strong>Ian Yeo</strong><br>Technology Leader & Board Advisor</p>
+      <p style="margin: 16px 0 0;">Best regards,<br><strong>Ian Yeo</strong><br>Founder & Former CEO of Operance (Acquired)</p>
     </div>
     
     <div style="background: #f8fafc; padding: 24px; border-top: 1px solid #e2e8f0; text-align: center;">
@@ -95,7 +95,7 @@ Your professional executive report gateway will help you build a qualified pipel
 
 Best regards,
 Ian Yeo
-Technology Leader & Board Advisor
+Founder & Former CEO of Operance (Acquired)
 
 ianyeo.com | ian@ianyeo.com | linkedin.com/in/iankyeo`
     };
