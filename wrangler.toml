@@ -10,11 +10,33 @@ binding = "REPORT_ACCESS"
 id = "920339f6aedd41b09a20d58d415b81d7" 
 preview_id = "2985eb457cdd46c4a637d41f8a419983" 
 
+# New KV Namespaces for AI Consultancy
+[[kv_namespaces]]
+binding = "LEADS_DB"
+id = "3c1c0a3bae1e469f8e9fb8addcb1de5a"
+preview_id = "a41b86bd9bcb4268975b440bec7d7703"
+
+[[kv_namespaces]]
+binding = "ASSESSMENTS_DB"
+id = "5163eb05989245a199b5cccccd60cfe2"
+preview_id = "cbc058ec5f374789a6533a63ae1609e9"
+
+[[kv_namespaces]]
+binding = "ANALYTICS_DB"
+id = "1c47688f310f4c40bc78bbcd57986009"
+preview_id = "28f481af3e0f4d3886d6d6406d57398b"
+
 # R2 Bucket for storing executive reports
 [[r2_buckets]]
 binding = "EXECUTIVE_REPORTS"
 bucket_name = "executive-reports"  # Replace with your actual R2 bucket name
 preview_bucket_name = "executive-reports-preview"  # Optional: for development
+
+# New R2 Bucket for lead magnets
+[[r2_buckets]]
+binding = "LEAD_MAGNETS"
+bucket_name = "lead-magnets"
+preview_bucket_name = "lead-magnets-preview"
 
 # Environment variables (set via dashboard or wrangler secret)
 [vars]
@@ -23,9 +45,28 @@ REPORT_FILE_KEY = "Ian_Yeo_CEO_Executive_Brief_2025.pdf"  # File key in R2 bucke
 ZOHO_FROM_EMAIL = "ian@ianyeo.com"  # Your verified Zoho sender email
 TURNSTILE_SITE_KEY = "0x4AAAAAAABkPtOo4wr4djKj"  # Replace with your actual Turnstile site key
 
-# Secrets (set via wrangler secret put)
-# ZOHO_API_KEY = "your-zoho-api-key"
-# TURNSTILE_SECRET_KEY = "your-turnstile-secret-key"
+# New environment variables for AI Consultancy (Zoho-based)
+ZOHO_CRM_API_URL = "https://www.zohoapis.com/crm/v6"
+ZOHO_CAMPAIGNS_API_URL = "https://campaigns.zoho.com/api/v1.1"
+ZOHO_ANALYTICS_API_URL = "https://analyticsapi.zoho.com/restapi/v2"
+ZOHO_ACCOUNTS_URL = "https://accounts.zoho.com"
+
+# Non-secret Zoho configuration (safe to commit)
+ZOHO_CRM_CLIENT_ID = "1000.Y29FWY9M8MKMB0Z2Y0VNGKLKUZ1G3U"
+GA4_MEASUREMENT_ID = "your-ga4-measurement-id"
+
+# =============================================================================
+# SECURITY NOTE: All secrets are managed via `wrangler secret put` command
+# DO NOT put actual secrets in this file - they are stored securely in Cloudflare
+# 
+# Required secrets to set in production:
+# wrangler secret put ZOHO_API_KEY
+# wrangler secret put TURNSTILE_SECRET_KEY  
+# wrangler secret put ZOHO_CRM_CLIENT_SECRET
+# wrangler secret put ZOHO_CRM_REFRESH_TOKEN
+# wrangler secret put ZOHO_CAMPAIGNS_REFRESH_TOKEN
+# wrangler secret put GA4_API_SECRET
+# =============================================================================
 
 # Routes for handling API requests
 [[routes]]
@@ -34,6 +75,15 @@ zone_name = "ianyeo.com"
 
 [[routes]]
 pattern = "www.ianyeo.com/api/*"
+zone_name = "ianyeo.com"
+
+# New route for AI consultancy landing page
+[[routes]]
+pattern = "ianyeo.com/ai-construction-consulting"
+zone_name = "ianyeo.com"
+
+[[routes]]
+pattern = "www.ianyeo.com/ai-construction-consulting"
 zone_name = "ianyeo.com"
 
 # Development settings

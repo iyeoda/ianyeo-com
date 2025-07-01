@@ -28,6 +28,13 @@ Thumbs.db
 .wrangler/
 .dev.vars
 
+# Security: Never commit secrets or credentials
+SECRETS_REFERENCE.md
+secrets.txt
+credentials.json
+*.key
+*.pem
+
 # Logs
 logs/
 *.log
