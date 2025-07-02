@@ -37,6 +37,105 @@ function parseMarkdownWithFrontMatter(markdown) {
   }
 }
 
+// Mock functions for local development when ASSETS binding is not available
+function getMockBlogContent(fileName) {
+  const mockPosts = {
+    '2024-12-15-digital-transformation-in-construction.md': `---
+title: Digital Transformation in Construction - A Strategic Approach
+date: 2024-12-15
+category: Digital Transformation
+excerpt: How construction companies can successfully navigate digital transformation with practical strategies and proven frameworks.
+---
+
+# Digital Transformation in Construction - A Strategic Approach
+
+This is mock content for local development. The actual blog post content would be loaded from the markdown file in production.
+
+## Key Points
+
+- Digital transformation requires strategic planning
+- Technology adoption must align with business objectives
+- Change management is critical for success
+`,
+    '2025-01-01-leadership-lessons-from-scaling-proptech.md': `---
+title: Leadership Lessons from Scaling PropTech
+date: 2025-01-01
+category: Leadership
+excerpt: Key insights and lessons learned from scaling technology solutions in the property and construction sectors.
+---
+
+# Leadership Lessons from Scaling PropTech
+
+This is mock content for local development. The actual blog post content would be loaded from the markdown file in production.
+
+## Leadership Insights
+
+- Building high-performing teams
+- Navigating market challenges
+- Scaling technology solutions
+`,
+    '2025-01-02-future-of-ai-in-construction.md': `---
+title: The Future of AI in Construction
+date: 2025-01-02
+category: AI & Technology
+excerpt: Exploring the transformative potential of artificial intelligence in construction and building management.
+---
+
+# The Future of AI in Construction
+
+This is mock content for local development. The actual blog post content would be loaded from the markdown file in production.
+
+## AI Applications
+
+- Predictive maintenance
+- Project optimization
+- Safety enhancement
+`,
+    '2025-07-01-ai-and-digital-transformation-in-construction.md': `---
+title: AI and Digital Transformation in Construction
+date: 2025-07-01
+category: AI & Technology
+excerpt: A comprehensive look at how AI is driving digital transformation across the construction industry.
+---
+
+# AI and Digital Transformation in Construction
+
+This is mock content for local development. The actual blog post content would be loaded from the markdown file in production.
+
+## Transformation Areas
+
+- Process automation
+- Data-driven decision making
+- Enhanced project delivery
+`
+  };
+  
+  return mockPosts[fileName] || `---
+title: Mock Blog Post
+date: 2025-01-01
+category: Development
+excerpt: This is a mock blog post for local development.
+---
+
+# Mock Blog Post
+
+This is mock content for local development when the actual blog file cannot be loaded.
+`;
+}
+
+function getMockBlogPost(fileName) {
+  const slug = fileName.replace('.md', '');
+  const mockData = {
+    title: `Mock Blog Post - ${slug}`,
+    date: '2025-01-01',
+    category: 'Development',
+    excerpt: 'This is a mock blog post for local development.',
+    slug: slug
+  };
+  
+  return mockData;
+}
+
 // Utility functions
 const generateId = () => crypto.randomUUID();
 const getCurrentTimestamp = () => new Date().toISOString();
@@ -91,15 +190,15 @@ export default {
     }
     
     if (path === '/style.css') {
-      return await handleStaticFile(request, 'style.css', 'text/css');
+      return await handleStaticFile(request, 'style.css', 'text/css', env);
     }
     
     if (path === '/ai-consultancy.css') {
-      return await handleStaticFile(request, 'ai-consultancy.css', 'text/css');
+      return await handleStaticFile(request, 'ai-consultancy.css', 'text/css', env);
     }
     
     if (path === '/ai-consultancy.js') {
-      return await handleStaticFile(request, 'ai-consultancy.js', 'application/javascript');
+      return await handleStaticFile(request, 'ai-consultancy.js', 'application/javascript', env);
     }
     
     // For non-API requests, return 404
@@ -245,11 +344,27 @@ async function getBlogPosts(env) {
   // This would allow for easier management of new posts without worker code changes.
 
   const posts = await Promise.all(blogFileNames.map(async (fileName) => {
-    const filePath = `blog/${fileName}`;
-    const content = await env.ASSETS.fetch(filePath).then(res => res.text());
-    const { frontMatter } = parseMarkdownWithFrontMatter(content);
-    const slug = fileName.replace('.md', ''); // Simple slug from filename
-    return { ...frontMatter, slug };
+    try {
+      const filePath = `blog/${fileName}`;
+      let content;
+      
+      if (env.ASSETS && env.ASSETS.fetch) {
+        // Production environment with ASSETS binding
+        content = await env.ASSETS.fetch(filePath).then(res => res.text());
+      } else {
+        // Local development fallback - return mock data for now
+        console.warn(`ASSETS binding not available for ${filePath}. Using mock data.`);
+        content = getMockBlogContent(fileName);
+      }
+      
+      const { frontMatter } = parseMarkdownWithFrontMatter(content);
+      const slug = fileName.replace('.md', ''); // Simple slug from filename
+      return { ...frontMatter, slug };
+    } catch (error) {
+      console.error(`Error fetching blog post ${fileName}:`, error);
+      // Return mock data for failed fetches
+      return getMockBlogPost(fileName);
+    }
   }));
 
   // Sort by date, newest first
@@ -261,7 +376,17 @@ async function getBlogPostContent(env, slug) {
   const fileName = `${slug}.md`;
   const filePath = `blog/${fileName}`;
   try {
-    const content = await env.ASSETS.fetch(filePath).then(res => res.text());
+    let content;
+    
+    if (env.ASSETS && env.ASSETS.fetch) {
+      // Production environment with ASSETS binding
+      content = await env.ASSETS.fetch(filePath).then(res => res.text());
+    } else {
+      // Local development fallback - return mock data for now
+      console.warn(`ASSETS binding not available for ${filePath}. Using mock data.`);
+      content = getMockBlogContent(fileName);
+    }
+    
     return parseMarkdownWithFrontMatter(content);
   } catch (error) {
     console.error(`Error fetching blog post ${filePath}:`, error);
@@ -972,23 +1097,64 @@ async function handleABTest(request, env, testName) {
  */
 async function handleHomepage(request, env) {
   try {
-    const response = await env.ASSETS.fetch(request);
-    // Override cache-control for the homepage if needed
-    response.headers.set('Cache-Control', 'public, max-age=300');
-    return response;
+    if (env.ASSETS && env.ASSETS.fetch) {
+      const response = await env.ASSETS.fetch(request);
+      // Override cache-control for the homepage if needed
+      response.headers.set('Cache-Control', 'public, max-age=300');
+      return response;
+    } else {
+      // Local development fallback - return a simple homepage
+      console.warn('ASSETS binding not available. Using fallback homepage.');
+      return new Response(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Ian Yeo - Local Development</title>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body>
+          <h1>Ian Yeo - Local Development Mode</h1>
+          <p>This is a fallback homepage for local development.</p>
+          <nav>
+            <ul>
+              <li><a href="/blog">Blog</a></li>
+              <li><a href="/ai-construction-consulting">AI Consultancy</a></li>
+            </ul>
+          </nav>
+        </body>
+        </html>
+      `, { 
+        headers: { 
+          'Content-Type': 'text/html',
+          'Cache-Control': 'public, max-age=300'
+        }
+      });
+    }
   } catch (error) {
     console.error('Error fetching homepage:', error);
     return new Response('Error loading homepage', { status: 500 });
   }
 }
 
-async function handleStaticFile(request, filename, contentType) {
+async function handleStaticFile(request, filename, contentType, env) {
   try {
-    const response = await env.ASSETS.fetch(request);
-    // Set appropriate content type and cache headers
-    response.headers.set('Content-Type', contentType);
-    response.headers.set('Cache-Control', 'public, max-age=31536000'); // Cache static assets for a year
-    return response;
+    if (env.ASSETS && env.ASSETS.fetch) {
+      const response = await env.ASSETS.fetch(request);
+      // Set appropriate content type and cache headers
+      response.headers.set('Content-Type', contentType);
+      response.headers.set('Cache-Control', 'public, max-age=31536000'); // Cache static assets for a year
+      return response;
+    } else {
+      // Local development fallback
+      console.warn(`ASSETS binding not available for ${filename}. Using fallback.`);
+      return new Response(`/* Fallback content for ${filename} in local development */`, {
+        headers: {
+          'Content-Type': contentType,
+          'Cache-Control': 'public, max-age=300'
+        }
+      });
+    }
   } catch (error) {
     console.error(`Error fetching static file ${filename}:`, error);
     return new Response(`Error loading ${filename}`, { status: 500 });
@@ -997,10 +1163,21 @@ async function handleStaticFile(request, filename, contentType) {
 
 async function handleConsultancyLandingPage(request, env) {
   try {
-    const response = await env.ASSETS.fetch(new Request(new URL('/ai-construction-consulting.html', request.url)));
-    // Override cache-control for the landing page if needed
-    response.headers.set('Cache-Control', 'public, max-age=300');
-    return response;
+    if (env.ASSETS && env.ASSETS.fetch) {
+      const response = await env.ASSETS.fetch(new Request(new URL('/ai-construction-consulting.html', request.url)));
+      // Override cache-control for the landing page if needed
+      response.headers.set('Cache-Control', 'public, max-age=300');
+      return response;
+    } else {
+      // Local development fallback - return dynamic consultancy landing page
+      console.warn('ASSETS binding not available. Using dynamic consultancy landing page.');
+      return new Response(getConsultancyLandingPageHTML(env), {
+        headers: {
+          'Content-Type': 'text/html',
+          'Cache-Control': 'public, max-age=300'
+        }
+      });
+    }
   } catch (error) {
     console.error('Error fetching AI Consultancy landing page:', error);
     return new Response('Error loading AI Consultancy page', { status: 500 });

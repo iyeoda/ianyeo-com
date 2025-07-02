@@ -1,6 +1,7 @@
 # Cloudflare Workers configuration for ianyeo.com
 
 name = "ianyeo-com"
+main = "workers-site/index.js"
 compatibility_date = "2024-01-01"
 
 
@@ -115,4 +116,10 @@ bucket = "./"
 # Development settings
 [env.development]
 name = "ianyeo-com-dev"
-vars = { SITE_URL = "http://localhost:8787", REPORT_FILE_KEY = "executive-report-dev.pdf" } 
+vars = { SITE_URL = "http://localhost:8787", REPORT_FILE_KEY = "executive-report-dev.pdf" }
+[env.development.site]
+bucket = "./"
+
+[[env.development.service_bindings]]
+name = "ASSETS"
+service = "__STATIC_CONTENT" 
