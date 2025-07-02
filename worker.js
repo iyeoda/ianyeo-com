@@ -395,6 +395,12 @@ async function handleApiRequest(request, env, url) {
         return await handleDebugRawZeptoMail(request, env);
       }
       break;
+      
+    case '/api/debug/test-bookings':
+      if (request.method === 'GET') {
+        return await handleDebugTestBookings(request, env);
+      }
+      break;
         
       default:
         // Check for dynamic routes
@@ -997,12 +1003,16 @@ async function handleStaticFile(request, filename, contentType) {
 
 async function handleConsultancyLandingPage(request, env) {
   try {
-    const response = await env.ASSETS.fetch(new Request(new URL('/ai-construction-consulting.html', request.url)));
-    // Override cache-control for the landing page if needed
-    response.headers.set('Cache-Control', 'public, max-age=300');
-    return response;
+    // Use dynamic HTML generation with updated Zoho Bookings widget
+    const html = getConsultancyLandingPageHTML(env);
+    return new Response(html, {
+      headers: {
+        'Content-Type': 'text/html',
+        'Cache-Control': 'public, max-age=300'
+      }
+    });
   } catch (error) {
-    console.error('Error fetching AI Consultancy landing page:', error);
+    console.error('Error generating AI Consultancy landing page:', error);
     return new Response('Error loading AI Consultancy page', { status: 500 });
   }
 }
@@ -2604,6 +2614,152 @@ async function handleDebugTestZeptoMail(request, env) {
   return jsonResponse(results);
 }
 
+async function handleDebugTestBookings(request, env) {
+  const results = {
+    timestamp: new Date().toISOString(),
+    test: 'zoho_bookings_debug',
+    steps: []
+  };
+
+  try {
+    // Step 1: Check configuration
+    results.steps.push({
+      step: 1,
+      name: 'Check Bookings Configuration',
+      status: 'INFO',
+      details: {
+        client_id: env.ZOHO_BOOKINGS_CLIENT_ID || 'MISSING',
+        client_secret: env.ZOHO_BOOKINGS_CLIENT_SECRET ? 'SET' : 'MISSING',
+        refresh_token: env.ZOHO_BOOKINGS_REFRESH_TOKEN ? 'SET' : 'MISSING',
+        api_url: env.ZOHO_BOOKINGS_API_URL || 'MISSING'
+      }
+    });
+
+    if (!env.ZOHO_BOOKINGS_CLIENT_SECRET || !env.ZOHO_BOOKINGS_REFRESH_TOKEN) {
+      results.steps.push({
+        step: 2,
+        name: 'Missing Credentials',
+        status: 'FAIL',
+        details: 'Required Zoho Bookings credentials not set'
+      });
+      return jsonResponse(results);
+    }
+
+    // Step 2: Test access token generation
+    let accessToken;
+    try {
+      accessToken = await getZohoBookingsAccessToken(env);
+      results.steps.push({
+        step: 2,
+        name: 'Generate Access Token',
+        status: accessToken ? 'PASS' : 'FAIL',
+        details: {
+          token_received: !!accessToken,
+          token_length: accessToken ? accessToken.length : 0,
+          token_preview: accessToken ? accessToken.substring(0, 20) + '...' : 'NO_TOKEN'
+        }
+      });
+    } catch (error) {
+      results.steps.push({
+        step: 2,
+        name: 'Generate Access Token',
+        status: 'FAIL',
+        details: {
+          error: error.message,
+          likely_causes: [
+            'Invalid refresh token',
+            'Expired OAuth credentials',
+            'Incorrect client ID/secret',
+            'Missing zohobookings.data.CREATE scope'
+          ]
+        }
+      });
+      return jsonResponse(results);
+    }
+
+    // Step 3: Test services API call
+    if (accessToken) {
+      try {
+        console.log('🧪 Testing services API call...');
+        const response = await fetch(`${env.ZOHO_BOOKINGS_API_URL}/json/services`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Zoho-oauthtoken ${accessToken}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        const responseText = await response.text();
+        let responseData;
+        try {
+          responseData = JSON.parse(responseText);
+        } catch {
+          responseData = { raw_response: responseText };
+        }
+        
+        results.steps.push({
+          step: 3,
+          name: 'Services API Call',
+          status: response.ok ? 'PASS' : 'FAIL',
+          details: {
+            status_code: response.status,
+            status_text: response.statusText,
+            headers: Object.fromEntries(response.headers),
+            response: responseData,
+            services_count: responseData?.response?.services?.length || 0
+          }
+        });
+
+        // Step 4: Analyze response
+        if (response.ok && responseData) {
+          const services = responseData?.response?.services || [];
+          results.steps.push({
+            step: 4,
+            name: 'Response Analysis',
+            status: 'INFO',
+            details: {
+              services_found: services.length,
+              services: services.map(s => ({
+                id: s.service_id,
+                name: s.service_name,
+                status: s.status,
+                online_booking: s.allow_online_booking
+              })),
+              possible_issues: services.length === 0 ? [
+                'No services configured in Zoho Bookings',
+                'Services not enabled for online booking',
+                'Services not published/active',
+                'Wrong Zoho account or workspace'
+              ] : []
+            }
+          });
+        }
+
+      } catch (error) {
+        results.steps.push({
+          step: 3,
+          name: 'Services API Call',
+          status: 'FAIL',
+          details: {
+            error: error.message,
+            api_endpoint: `${env.ZOHO_BOOKINGS_API_URL}/json/services`
+          }
+        });
+      }
+    }
+
+  } catch (error) {
+    results.steps.push({
+      step: 'ERROR',
+      name: 'Bookings Test Error',
+      status: 'FAIL',
+      details: error.message
+    });
+  }
+
+  return jsonResponse(results);
+}
+
 async function handleDebugRawZeptoMail(request, env) {
   const results = {
     timestamp: new Date().toISOString(),
@@ -2812,34 +2968,208 @@ function getConsultancyLandingPageHTML(env) {
         .hero { 
           background: var(--gradient-primary);
           color: white; 
-          padding: 100px 0; 
+          padding: 120px 0; 
           text-align: center;
           position: relative;
+          overflow: hidden;
+        }
+
+        .hero::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                      radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.08) 0%, transparent 50%);
+        }
+
+        .hero .container {
+          position: relative;
+          z-index: 1;
+        }
+
+        .hero-badge {
+          display: inline-block;
+          background: rgba(255, 255, 255, 0.15);
+          backdrop-filter: blur(10px);
+          padding: 0.8rem 2rem;
+          border-radius: 30px;
+          margin-bottom: 2rem;
+          border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .hero-badge span {
+          font-size: 0.95rem;
+          font-weight: 600;
+          letter-spacing: 0.025em;
         }
 
         .hero-title { 
-          font-size: 3rem; 
-          margin-bottom: 1rem; 
-          font-weight: 700;
+          font-size: 3.5rem; 
+          margin-bottom: 1.5rem; 
+          font-weight: 800;
           line-height: 1.1;
+          background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%);
+          background-clip: text;
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
         }
 
         .hero-subtitle { 
-          font-size: 1.2rem; 
-          margin-bottom: 2rem; 
-          opacity: 0.9;
-          max-width: 600px;
+          font-size: 1.4rem; 
+          margin-bottom: 3rem; 
+          opacity: 0.95;
+          max-width: 700px;
           margin-left: auto;
           margin-right: auto;
+          line-height: 1.5;
+          font-weight: 400;
         }
 
-                 .hero-cta {
-           display: flex;
-           gap: 1rem;
-           justify-content: center;
-           flex-wrap: wrap;
-           margin-top: 2rem;
-         }
+        .hero-benefits {
+          display: flex;
+          justify-content: center;
+          gap: 3rem;
+          margin-bottom: 3rem;
+          flex-wrap: wrap;
+        }
+
+        .benefit-item {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 0.5rem;
+          padding: 1.5rem;
+          background: rgba(255, 255, 255, 0.1);
+          backdrop-filter: blur(10px);
+          border-radius: 15px;
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          min-width: 160px;
+          transition: all var(--transition-normal);
+        }
+
+        .benefit-item:hover {
+          transform: translateY(-5px);
+          background: rgba(255, 255, 255, 0.15);
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .benefit-icon {
+          font-size: 2rem;
+          margin-bottom: 0.5rem;
+        }
+
+        .benefit-text {
+          font-weight: 600;
+          font-size: 1rem;
+          line-height: 1.2;
+        }
+
+        .hero-cta {
+          display: flex;
+          gap: 1.5rem;
+          justify-content: center;
+          flex-wrap: wrap;
+          margin: 3rem 0;
+        }
+
+        .hero-primary, .hero-secondary {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 0.5rem;
+          padding: 1.5rem 2.5rem;
+          border-radius: 15px;
+          font-weight: 700;
+          font-size: 1.2rem;
+          text-decoration: none;
+          transition: all var(--transition-normal);
+          position: relative;
+          overflow: hidden;
+          min-width: 280px;
+        }
+
+        .hero-primary {
+          background: #ffffff;
+          color: #667eea;
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .hero-primary:hover {
+          transform: translateY(-3px);
+          box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+          background: #f8fafc;
+        }
+
+        .hero-secondary {
+          background: transparent;
+          color: white;
+          border: 2px solid rgba(255, 255, 255, 0.8);
+          backdrop-filter: blur(10px);
+        }
+
+        .hero-secondary:hover {
+          transform: translateY(-3px);
+          background: rgba(255, 255, 255, 0.1);
+          border-color: white;
+          box-shadow: 0 10px 30px rgba(255, 255, 255, 0.2);
+        }
+
+        .hero-primary small, .hero-secondary small {
+          font-size: 0.85rem;
+          font-weight: 500;
+          opacity: 0.8;
+          line-height: 1.2;
+        }
+
+        .hero-proof {
+          display: flex;
+          justify-content: center;
+          gap: 4rem;
+          margin: 4rem 0 2rem;
+          flex-wrap: wrap;
+        }
+
+        .proof-item {
+          text-align: center;
+        }
+
+        .proof-number {
+          display: block;
+          font-size: 2.5rem;
+          font-weight: 800;
+          line-height: 1;
+          margin-bottom: 0.5rem;
+          background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%);
+          background-clip: text;
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+        }
+
+        .proof-label {
+          font-size: 0.9rem;
+          opacity: 0.9;
+          font-weight: 500;
+        }
+
+        .hero-guarantee {
+          background: rgba(255, 255, 255, 0.1);
+          backdrop-filter: blur(10px);
+          padding: 1.5rem 2rem;
+          border-radius: 15px;
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          max-width: 600px;
+          margin: 0 auto;
+        }
+
+        .hero-guarantee p {
+          margin: 0;
+          font-size: 1rem;
+          line-height: 1.5;
+        }
 
         /* Buttons */
         .btn-primary, .btn-secondary {
@@ -3089,14 +3419,62 @@ function getConsultancyLandingPageHTML(env) {
     <!-- Hero Section -->
     <section class="hero">
         <div class="container">
-            <h1 class="hero-title">Transform Your Construction Business with AI</h1>
+            <div class="hero-badge">
+                <span>🏆 Founder & Former CEO Operance (Acquired by Zutec) | 470% Revenue Growth</span>
+            </div>
+            <h1 class="hero-title">Transform Your Construction Business with Proven AI Leadership</h1>
             <p class="hero-subtitle">
-                Join 500+ construction leaders who've unlocked competitive advantage through artificial intelligence. 
-                Expert consulting from Ian Yeo, former CEO with proven track record scaling PropTech companies.
+                Learn from a successful PropTech founder who built and scaled Operance from concept to acquisition. 
+                Expert AI strategy consulting from Ian Yeo, with proven experience serving 115 enterprise customers 
+                including 50% of the UK's top 10 contractors.
             </p>
+            
+            <!-- Value Proposition Points -->
+            <div class="hero-benefits">
+                <div class="benefit-item">
+                    <span class="benefit-icon">🎯</span>
+                    <span class="benefit-text">Proven AI Implementation</span>
+                </div>
+                <div class="benefit-item">
+                    <span class="benefit-icon">📈</span>
+                    <span class="benefit-text">5.9x LTV:CAC Ratio</span>
+                </div>
+                <div class="benefit-item">
+                    <span class="benefit-icon">🚀</span>
+                    <span class="benefit-text">First-to-Market Innovation</span>
+                </div>
+            </div>
+            
             <div class="hero-cta">
-                <a href="#assessment" class="btn-primary">Take Free AI Readiness Assessment</a>
-                <a href="#contact" class="btn-secondary">Book Strategy Call</a>
+                <a href="#booking" class="btn-primary hero-primary">
+                    📅 Book Your Free AI Strategy Session
+                    <small>Learn from proven PropTech success</small>
+                </a>
+                <a href="#assessment" class="btn-secondary hero-secondary">
+                    📊 Take 2-Min AI Assessment
+                    <small>Get personalized insights</small>
+                </a>
+            </div>
+            
+            <!-- Urgency & Social Proof -->
+            <div class="hero-proof">
+                <div class="proof-item">
+                    <span class="proof-number">470%</span>
+                    <span class="proof-label">Revenue Growth</span>
+                </div>
+                <div class="proof-item">
+                    <span class="proof-number">115</span>
+                    <span class="proof-label">Enterprise Customers</span>
+                </div>
+                <div class="proof-item">
+                    <span class="proof-number">25+</span>
+                    <span class="proof-label">Years Experience</span>
+                </div>
+            </div>
+            
+            <!-- Risk Reversal -->
+            <div class="hero-guarantee">
+                <p>🔒 <strong>No obligations:</strong> Real insights from a successful exit. Just actionable guidance tailored to your business.</p>
             </div>
         </div>
     </section>
@@ -3246,797 +3624,943 @@ function getConsultancyLandingPageHTML(env) {
         </div>
     </section>
 
-    <!-- Contact Section -->
-    <section id="contact" class="section">
+ 
+    <!-- Executive Authority Section -->
+    <section id="authority" class="executive-authority">
         <div class="container">
-            <h2 class="section-title">Ready to Transform Your Business?</h2>
-            <div style="text-align: center;">
-                <p style="font-size: 1.2rem; margin-bottom: 2rem;">
-                    Book a free 30-minute strategy call to discuss your AI opportunities
-                </p>
-                                 <button onclick="openBookingModal()" class="btn-primary" style="font-size: 1.1rem; padding: 20px 40px;">
-                      Book Free Strategy Call
-                  </button>
+            <div class="authority-content">
+                <div class="authority-header">
+                    <h2>Why Construction Leaders Choose Ian Yeo</h2>
+                    <p class="authority-subtitle">Founder & Former CEO who successfully built and scaled Operance from concept to acquisition</p>
+                </div>
+                
+                <div class="authority-grid">
+                    <div class="authority-profile">
+                        <div class="profile-image">
+                            <img src="/assets/ian-yeo-profile.jpg" alt="Ian Yeo, Founder & Former CEO of Operance" loading="lazy">
+                            <div class="profile-badge">
+                                <span>25+ Years</span>
+                                <small>Construction Technology</small>
+                            </div>
+                        </div>
+                        <div class="profile-intro">
+                            <h3>Ian Yeo</h3>
+                            <p class="profile-title">Founder & Former CEO, Operance (Acquired by Zutec)</p>
+                            <p class="profile-tagline">
+                                "I help construction companies implement AI strategies that deliver measurable business results"
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="authority-achievements">
+                        <div class="achievement-grid">
+                            <div class="achievement-item">
+                                <div class="achievement-number">470%</div>
+                                <div class="achievement-label">Revenue Growth</div>
+                                <div class="achievement-detail">£82K to £472K in 9 years</div>
+                            </div>
+                            <div class="achievement-item">
+                                <div class="achievement-number">115</div>
+                                <div class="achievement-label">Enterprise Customers</div>
+                                <div class="achievement-detail">Including 50% of UK's top 10 contractors</div>
+                            </div>
+                            <div class="achievement-item">
+                                <div class="achievement-number">5.9x</div>
+                                <div class="achievement-label">LTV:CAC Ratio</div>
+                                <div class="achievement-detail">Proven SaaS metrics performance</div>
+                            </div>
+                            <div class="achievement-item">
+                                <div class="achievement-number">280%</div>
+                                <div class="achievement-label">Team Scaling</div>
+                                <div class="achievement-detail">5 to 19 employees during growth</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Experience Highlights -->
+                <div class="experience-highlights">
+                    <h3>Proven PropTech Leadership</h3>
+                    <div class="experience-grid">
+                        <div class="experience-card">
+                            <div class="experience-icon">🏗️</div>
+                            <div class="experience-content">
+                                <h4>Construction Industry Expertise</h4>
+                                <p>
+                                    25+ years in construction technology, from BIM Manager at Sewell Construction 
+                                    to founding and scaling Operance from concept to successful acquisition.
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div class="experience-card">
+                            <div class="experience-icon">🎯</div>
+                            <div class="experience-content">
+                                <h4>AI-First Innovation</h4>
+                                <p>
+                                    Pioneered first-to-market generative AI for building information management, 
+                                    serving 50% of the UK's top 10 contractors.
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div class="experience-card">
+                            <div class="experience-icon">📈</div>
+                            <div class="experience-content">
+                                <h4>Successful Exit Strategy</h4>
+                                <p>
+                                    Built Operance from startup to acquisition by Zutec (BuildData Group) in January 2025, 
+                                    achieving 470% revenue growth and strong SaaS metrics.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Credibility Indicators -->
+                <div class="credibility-section">
+                    <div class="credentials-row">
+                        <div class="credential-item">
+                            <div class="credential-icon">🎯</div>
+                            <div class="credential-content">
+                                <h4>Proven Track Record</h4>
+                                <p>Successfully scaled Operance to 470% revenue growth and acquisition by Zutec</p>
+                            </div>
+                        </div>
+                        <div class="credential-item">
+                            <div class="credential-icon">🎓</div>
+                            <div class="credential-content">
+                                <h4>Technical Foundation</h4>
+                                <p>BEng Civil Engineering (Loughborough), Chartered Engineer (CEng MICE)</p>
+                            </div>
+                        </div>
+                        <div class="credential-item">
+                            <div class="credential-icon">💼</div>
+                            <div class="credential-content">
+                                <h4>Industry Experience</h4>
+                                <p>25+ years from BIM Manager to CEO, deep construction technology expertise</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Urgency CTA -->
+                <div class="authority-cta">
+                    <div class="cta-content">
+                        <h3>Limited Availability for Q1 2025</h3>
+                        <p>Only 8 strategy sessions remaining this quarter. Book now to secure your transformation roadmap.</p>
+                        <a href="#booking" class="btn-primary cta-urgent">
+                            🚀 Claim Your Strategy Session
+                        </a>
+                        <div class="urgency-indicators">
+                            <span class="urgency-item">✅ 30-minute consultation</span>
+                            <span class="urgency-item">✅ Custom ROI analysis</span>
+                            <span class="urgency-item">✅ Implementation roadmap</span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
 
-    <!-- Beautiful Booking Modal -->
-    <div id="bookingModal" class="booking-modal">
-        <div class="booking-modal-content">
-            <div class="booking-modal-header">
-                <h3>Book Your Free Strategy Call</h3>
-                <span class="close-modal" onclick="closeBookingModal()">&times;</span>
-            </div>
-            
-            <div class="booking-modal-body">
-                <div class="booking-step" id="step1">
-                    <h4>Tell me about your project</h4>
-                    <form id="bookingForm">
-                        <div class="form-group">
-                            <label for="bookingFirstName">First Name *</label>
-                            <input type="text" id="bookingFirstName" name="firstName" required>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="bookingLastName">Last Name *</label>
-                            <input type="text" id="bookingLastName" name="lastName" required>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="bookingEmail">Email Address *</label>
-                            <input type="email" id="bookingEmail" name="email" required>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="bookingCompany">Company Name *</label>
-                            <input type="text" id="bookingCompany" name="company" required>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="bookingPhone">Phone Number</label>
-                            <input type="tel" id="bookingPhone" name="phone">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="bookingMessage">What's your biggest AI challenge? *</label>
-                            <textarea id="bookingMessage" name="message" rows="4" required placeholder="Tell me about your current situation and what you'd like to achieve with AI..."></textarea>
-                        </div>
-                        
-                        <button type="button" onclick="showTimeSlots()" class="btn-primary full-width">
-                            Continue to Time Selection
-                        </button>
-                    </form>
-                </div>
+    <!-- Old booking system removed for simplified Zoho Bookings widget -->
+
+    <!-- Booking Section -->
+    <section id="booking" class="booking-section">
+        <div class="container">
+            <div class="booking-content">
+                <h2>Book Your Free Strategy Session</h2>
+                <p>Schedule a 30-minute consultation to discuss your AI transformation journey with Ian Yeo directly.</p>
                 
-                <div class="booking-step hidden" id="step2">
-                    <h4>Choose your preferred time</h4>
-                    <div class="time-slots-container">
-                        <div class="timezone-info">
-                            <span>🌍 Times shown in: London (GMT)</span>
-                        </div>
+                <div class="booking-container">
+                    <div class="booking-info">
+                        <h3>What You'll Get:</h3>
+                        <ul>
+                            <li>✅ Custom AI readiness assessment for your business</li>
+                            <li>✅ Specific recommendations for your industry</li>
+                            <li>✅ ROI projections for AI implementations</li>
+                            <li>✅ Clear roadmap for getting started</li>
+                            <li>✅ Access to exclusive resources and case studies</li>
+                        </ul>
                         
-                        <div class="available-slots">
-                            <h5>This Week</h5>
-                            <div class="slot-group" id="thisWeekSlots"></div>
-                            
-                            <h5>Next Week</h5>
-                            <div class="slot-group" id="nextWeekSlots"></div>
-                        </div>
-                        
-                        <div class="selected-time hidden" id="selectedTimeDisplay">
-                            <div class="selected-time-card">
-                                <span class="selected-time-icon">📅</span>
-                                <div class="selected-time-details">
-                                    <strong id="selectedTimeText"></strong>
-                                    <span id="selectedDateText"></span>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="booking-actions">
-                            <button type="button" onclick="showContactForm()" class="btn-secondary">
-                                ← Back to Details
-                            </button>
-                            <button type="button" onclick="confirmBooking()" class="btn-primary" id="confirmBookingBtn" disabled>
-                                Confirm Booking
-                            </button>
+                        <div class="booking-value-prop">
+                            <h4>What makes this different?</h4>
+                            <p>
+                                You're not getting generic AI advice. You're learning from someone who built 
+                                an AI-powered PropTech platform from concept to successful acquisition. 
+                                Real experience. Real results. Real insights.
+                            </p>
                         </div>
                     </div>
-                </div>
-                
-                <div class="booking-step hidden" id="step3">
-                    <div class="booking-success">
-                        <div class="success-icon">✅</div>
-                        <h4>Booking Request Sent!</h4>
-                        <p>Thanks! I'll be in touch within 24 hours to confirm your preferred time.</p>
-                        <p class="booking-details">
-                            <strong>Requested Time:</strong><br>
-                            <span id="finalTimeDisplay"></span>
-                        </p>
-                        <p><small>Check your email for confirmation details.</small></p>
-                        <button onclick="closeBookingModal()" class="btn-primary">
-                            Close
-                        </button>
+                    
+                    <div class="booking-form-container">
+                        <!-- Zoho Bookings Embedded Widget -->
+                        <div class="zoho-booking-widget">
+                            <div class="booking-widget-header">
+                                <h3>Schedule Your Strategy Session</h3>
+                                <p>Choose a convenient time for your free 30-minute AI consultation with Ian Yeo.</p>
+                            </div>
+                            
+                            <!-- Option 1: Direct Booking Button (Recommended) -->
+                            <div class="booking-button-container">
+                                <a href="https://ianyeo.zohobookings.com/#/ai-strategy-consultation" 
+                                   target="_blank" 
+                                   class="btn-primary booking-cta"
+                                   onclick="trackBookingClick()">
+                                    📅 Book Free Strategy Session
+                                </a>
+                                <p class="booking-notice">
+                                    Opens in a new window • Secure Zoho Bookings powered • Instant calendar sync
+                                </p>
+                            </div>
+                            
+                            <!-- Booking Benefits Reminder -->
+                            <div class="booking-benefits">
+                                <h4>What happens next?</h4>
+                                <div class="benefit-steps">
+                                    <div class="step">
+                                        <span class="step-number">1</span>
+                                        <span class="step-text">Choose your preferred time slot</span>
+                                    </div>
+                                    <div class="step">
+                                        <span class="step-number">2</span>
+                                        <span class="step-text">Receive calendar invite & confirmation email</span>
+                                    </div>
+                                    <div class="step">
+                                        <span class="step-number">3</span>
+                                        <span class="step-text">Join the call for your personalized AI strategy session</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Alternative Contact Option -->
+                            <div class="alternative-contact">
+                                <p>Prefer to discuss over email first? <a href="#assessment" class="text-link">Take the AI Assessment</a> or <a href="mailto:ian@ianyeo.com" class="text-link">send a message</a>.</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+    </section>
 
     <style>
-        /* Beautiful Booking Modal Styles */
-        .booking-modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0,0,0,0.5);
-            backdrop-filter: blur(5px);
+        /* Zoho Bookings Widget Styles */
+        .booking-section {
+            padding: 80px 0;
+            background: var(--bg-secondary);
         }
 
-        .booking-modal-content {
-            background-color: #fefefe;
-            margin: 2% auto;
-            padding: 0;
-            border: none;
-            border-radius: 15px;
-            width: 90%;
+        .booking-content h2 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+            font-weight: 700;
+        }
+
+        .booking-content > p {
+            text-align: center;
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            margin-bottom: 3rem;
             max-width: 600px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
-            position: relative;
-            max-height: 90vh;
-            overflow-y: auto;
+            margin-left: auto;
+            margin-right: auto;
         }
 
-        .booking-modal-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        .booking-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            align-items: start;
+        }
+
+        .booking-info h3 {
+            color: var(--text-primary);
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .booking-info ul {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 2rem;
+        }
+
+        .booking-info li {
+            padding: 0.5rem 0;
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .booking-testimonial {
+            background: white;
+            padding: 2rem;
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .booking-testimonial blockquote {
+            font-style: italic;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        .booking-testimonial cite {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .zoho-booking-widget {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .booking-widget-header {
+            margin-bottom: 2rem;
+        }
+
+        .booking-widget-header h3 {
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .booking-widget-header p {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            margin-bottom: 0;
+        }
+
+        .booking-button-container {
+            margin-bottom: 2rem;
+        }
+
+        .booking-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all var(--transition-normal);
+            min-width: 280px;
+            justify-content: center;
+        }
+
+        .booking-cta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4);
+        }
+
+        .booking-notice {
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            color: var(--text-tertiary);
+        }
+
+        .booking-benefits {
+            margin-bottom: 2rem;
+            text-align: left;
+        }
+
+        .booking-benefits h4 {
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+            text-align: center;
+        }
+
+        .benefit-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .step {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .step-number {
+            background: var(--gradient-primary);
             color: white;
-            padding: 25px 30px;
-            border-radius: 15px 15px 0 0;
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+
+        .step-text {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .alternative-contact {
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border-subtle);
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .text-link {
+            color: #3498db;
+            text-decoration: none;
+        }
+
+        .text-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Executive Authority Section */
+        .executive-authority {
+            padding: 100px 0;
+            background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+            position: relative;
+        }
+
+        .authority-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .authority-header h2 {
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            line-height: 1.1;
+        }
+
+        .authority-subtitle {
+            font-size: 1.3rem;
+            color: var(--text-secondary);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .authority-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            margin-bottom: 5rem;
+            align-items: start;
+        }
+
+        .authority-profile {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .profile-image {
+            position: relative;
+            width: 300px;
+            margin: 0 auto 3rem auto;
+        }
+
+        .profile-image img {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .profile-badge {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: var(--gradient-primary);
+            color: white;
+            padding: 1rem;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .profile-badge span {
+            display: block;
+            font-size: 1.2rem;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .profile-badge small {
+            font-size: 0.8rem;
+            opacity: 0.9;
+        }
+
+        .profile-intro {
+            text-align: center;
+        }
+
+        .profile-intro h3 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .profile-title {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .profile-tagline {
+            font-size: 1.1rem;
+            color: #3498db;
+            font-style: italic;
+            font-weight: 500;
+            line-height: 1.5;
+        }
+
+        .authority-achievements {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .achievement-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .achievement-item {
+            text-align: center;
+            padding: 1.5rem;
+            border-radius: 15px;
+            background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+            border: 2px solid rgba(102, 126, 234, 0.1);
+            transition: all var(--transition-normal);
+        }
+
+        .achievement-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.15);
+            border-color: rgba(102, 126, 234, 0.3);
+        }
+
+        .achievement-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #3498db;
+            line-height: 1;
+            margin-bottom: 0.5rem;
+        }
+
+        .achievement-label {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.3rem;
+        }
+
+        .achievement-detail {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        .executive-testimonials {
+            margin-bottom: 4rem;
+        }
+
+        .executive-testimonials h3 {
+            text-align: center;
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 3rem;
+        }
+
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+
+        .testimonial-card {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: all var(--transition-normal);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .testimonial-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-primary);
+        }
+
+        .testimonial-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .quote-mark {
+            font-size: 4rem;
+            color: #3498db;
+            line-height: 1;
+            opacity: 0.3;
+            position: absolute;
+            top: 1rem;
+            left: 1.5rem;
+        }
+
+        .testimonial-content blockquote {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: var(--text-primary);
+            margin: 2rem 0 1.5rem;
+            font-style: italic;
+            position: relative;
+            z-index: 1;
+        }
+
+        .testimonial-author {
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
-        .booking-modal-header h3 {
-            margin: 0;
-            font-size: 1.5rem;
+        .author-info cite {
+            display: block;
+            font-size: 1.1rem;
             font-weight: 600;
+            color: var(--text-primary);
+            font-style: normal;
         }
 
-        .close-modal {
-            color: white;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-            width: 35px;
-            height: 35px;
+        .author-info span {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .company-logo {
+            font-size: 2rem;
+            opacity: 0.7;
+        }
+
+        .credibility-section {
+            margin-bottom: 4rem;
+        }
+
+        .credentials-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .credential-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 1.5rem;
+            padding: 2rem;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            transition: all var(--transition-normal);
+        }
+
+        .credential-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+        }
+
+        .credential-icon {
+            font-size: 2rem;
+            width: 3rem;
+            height: 3rem;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 50%;
-            transition: background-color 0.3s;
-        }
-
-        .close-modal:hover {
-            background-color: rgba(255,255,255,0.2);
-        }
-
-        .booking-modal-body {
-            padding: 30px;
-        }
-
-        .booking-step {
-            animation: fadeIn 0.3s ease-in;
-        }
-
-        .booking-step.hidden {
-            display: none;
-        }
-
-        .booking-step h4 {
-            color: #2c3e50;
-            margin-bottom: 25px;
-            font-size: 1.3rem;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #2c3e50;
-        }
-
-        .form-group input, .form-group textarea {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e1e8ed;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: border-color 0.3s;
-            box-sizing: border-box;
-        }
-
-        .form-group input:focus, .form-group textarea:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-        .full-width {
-            width: 100%;
-            margin-top: 10px;
-        }
-
-        .time-slots-container {
-            max-height: 400px;
-            overflow-y: auto;
-        }
-
-        .timezone-info {
-            background: #f8f9fa;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            text-align: center;
-            font-size: 14px;
-            color: #6c757d;
-        }
-
-        .available-slots h5 {
-            color: #2c3e50;
-            margin: 20px 0 15px 0;
-            font-size: 1.1rem;
-        }
-
-        .slot-group {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .time-slot {
-            padding: 12px 15px;
-            border: 2px solid #e1e8ed;
-            border-radius: 8px;
-            background: white;
-            cursor: pointer;
-            text-align: center;
-            transition: all 0.3s;
-            font-size: 14px;
-            font-weight: 500;
-        }
-
-        .time-slot:hover {
-            border-color: #667eea;
-            background: #f0f4ff;
-        }
-
-        .time-slot.selected {
-            border-color: #667eea;
-            background: #667eea;
-            color: white;
-        }
-
-        .selected-time {
-            margin: 20px 0;
-            padding: 15px;
-            background: #f0f4ff;
+            background: var(--gradient-primary);
             border-radius: 10px;
-            border-left: 4px solid #667eea;
+            flex-shrink: 0;
         }
 
-        .selected-time-card {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .selected-time-icon {
-            font-size: 24px;
-        }
-
-        .selected-time-details strong {
-            display: block;
-            color: #2c3e50;
-            font-size: 1.1rem;
-        }
-
-        .selected-time-details span {
-            color: #6c757d;
-            font-size: 0.9rem;
-        }
-
-        .booking-actions {
-            display: flex;
-            gap: 15px;
-            margin-top: 30px;
-        }
-
-        .booking-actions button {
-            flex: 1;
-            padding: 12px 20px;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
+        .credential-content h4 {
+            font-size: 1.2rem;
             font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
         }
 
-        .btn-primary {
-            background: #667eea;
-            color: white;
-            border: none !important;
+        .credential-content p {
+            color: var(--text-secondary);
+            line-height: 1.5;
         }
 
-        .btn-primary:hover {
-            background: #5a6fd8;
-            transform: translateY(-1px);
-        }
-
-        .btn-primary:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .btn-secondary {
-            background: transparent;
-            color: #667eea;
-            border: 2px solid #667eea !important;
-        }
-
-        .btn-secondary:hover {
-            background: #667eea;
-            color: white;
-        }
-
-        .booking-success {
+        .authority-cta {
+            background: var(--gradient-primary);
+            padding: 3rem;
+            border-radius: 25px;
             text-align: center;
-            padding: 20px;
+            color: white;
+            position: relative;
+            overflow: hidden;
         }
 
-        .success-icon {
-            font-size: 48px;
-            margin-bottom: 20px;
+        .authority-cta::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 30% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
         }
 
-        .booking-success h4 {
-            color: #28a745;
-            margin-bottom: 15px;
+        .cta-content {
+            position: relative;
+            z-index: 1;
         }
 
-        .booking-details {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 20px 0;
+        .authority-cta h3 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            line-height: 1.2;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+        .authority-cta p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            opacity: 0.95;
         }
 
+        .cta-urgent {
+            background: white !important;
+            color: #667eea !important;
+            padding: 1.2rem 3rem !important;
+            font-size: 1.3rem !important;
+            font-weight: 700 !important;
+            border-radius: 15px !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: 0.5rem !important;
+            margin-bottom: 2rem !important;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2) !important;
+            transition: all var(--transition-normal) !important;
+        }
+
+        .cta-urgent:hover {
+            transform: translateY(-3px) !important;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25) !important;
+        }
+
+        .urgency-indicators {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .urgency-item {
+            font-size: 1rem;
+            font-weight: 500;
+            opacity: 0.9;
+        }
+
+        /* Mobile Responsive for Hero Section */
         @media (max-width: 768px) {
-            .booking-modal-content {
-                width: 95%;
-                margin: 5% auto;
+            .hero {
+                padding: 80px 0;
             }
-            
-            .booking-modal-body {
-                padding: 20px;
+
+            .hero-badge {
+                padding: 0.6rem 1.5rem;
+                margin-bottom: 1.5rem;
             }
-            
-            .slot-group {
-                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+
+            .hero-badge span {
+                font-size: 0.85rem;
             }
-            
-            .booking-actions {
+
+            .hero-title {
+                font-size: 2.5rem;
+                margin-bottom: 1rem;
+            }
+
+            .hero-subtitle {
+                font-size: 1.1rem;
+                margin-bottom: 2rem;
+            }
+
+            .hero-benefits {
                 flex-direction: column;
+                gap: 1rem;
+                margin-bottom: 2rem;
+            }
+
+            .benefit-item {
+                min-width: auto;
+                padding: 1rem;
+            }
+
+            .hero-cta {
+                flex-direction: column;
+                gap: 1rem;
+                margin: 2rem 0;
+            }
+
+            .hero-primary, .hero-secondary {
+                min-width: auto;
+                width: 100%;
+                padding: 1.2rem 2rem;
+                font-size: 1.1rem;
+            }
+
+            .hero-proof {
+                gap: 2rem;
+                margin: 3rem 0 1.5rem;
+            }
+
+            .proof-number {
+                font-size: 2rem;
+            }
+
+            .hero-guarantee {
+                padding: 1rem 1.5rem;
+                margin: 2rem 1rem 0;
+            }
+
+            .hero-guarantee p {
+                font-size: 0.9rem;
+            }
+        }
+
+        /* Mobile Responsive for Authority Section */
+        @media (max-width: 768px) {
+            .authority-header h2 {
+                font-size: 2.2rem;
+            }
+
+            .authority-subtitle {
+                font-size: 1.1rem;
+            }
+
+            .authority-grid {
+                grid-template-columns: 1fr;
+                gap: 3rem;
+            }
+
+            .profile-image {
+                width: 250px;
+                margin-bottom: 4rem;
+            }
+
+            .profile-intro h3 {
+                font-size: 2rem;
+            }
+
+            .achievement-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .testimonials-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .credentials-row {
+                grid-template-columns: 1fr;
+            }
+
+            .authority-cta {
+                padding: 2rem;
+            }
+
+            .authority-cta h3 {
+                font-size: 1.8rem;
+            }
+
+            .urgency-indicators {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .booking-container {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            .booking-content h2 {
+                font-size: 2rem;
+            }
+
+            .zoho-booking-widget {
+                padding: 1.5rem;
+            }
+
+            .booking-cta {
+                min-width: auto;
+                width: 100%;
+            }
+
+            .benefit-steps {
+                gap: 0.75rem;
+            }
+
+            .step-text {
+                font-size: 0.9rem;
             }
         }
     </style>
 
     <script>
-        // Zoho Bookings Integration
-        let selectedTimeSlot = null;
-        let selectedSlotData = null;
-        let bookingFormData = {};
-        let availableServices = [];
-        let currentServiceId = null;
-
-        async function openBookingModal() {
-            document.getElementById('bookingModal').style.display = 'block';
-            document.body.style.overflow = 'hidden';
-            
-            // Load services when modal opens
-            await loadBookingServices();
-            showContactForm(); // Start with step 1
-        }
-
-        function closeBookingModal() {
-            document.getElementById('bookingModal').style.display = 'none';
-            document.body.style.overflow = 'auto';
-            resetBookingForm();
-        }
-
-        function showContactForm() {
-            document.getElementById('step1').classList.remove('hidden');
-            document.getElementById('step2').classList.add('hidden');
-            document.getElementById('step3').classList.add('hidden');
-        }
-
-        async function loadBookingServices() {
-            try {
-                const response = await fetch('/api/bookings/services');
-                const result = await response.json();
-                
-                if (result.success && result.services && result.services.length > 0) {
-                    availableServices = result.services;
-                    currentServiceId = result.services[0].service_id; // Use first available service
-                    console.log('📅 Loaded Zoho Bookings services:', result.services.length);
-                } else {
-                    console.log('⚠️ No Zoho Bookings services found, falling back to basic booking');
-                    availableServices = [];
-                    currentServiceId = null;
-                }
-            } catch (error) {
-                console.error('❌ Error loading booking services:', error);
-                availableServices = [];
-                currentServiceId = null;
-            }
-        }
-
-        async function showTimeSlots() {
-            // Collect form data
-            bookingFormData = {
-                firstName: document.getElementById('bookingFirstName').value,
-                lastName: document.getElementById('bookingLastName').value,
-                email: document.getElementById('bookingEmail').value,
-                company: document.getElementById('bookingCompany').value,
-                phone: document.getElementById('bookingPhone').value,
-                message: document.getElementById('bookingMessage').value
-            };
-
-            // Validate required fields
-            if (!bookingFormData.firstName || !bookingFormData.lastName || 
-                !bookingFormData.email || !bookingFormData.company || !bookingFormData.message) {
-                alert('Please fill in all required fields');
-                return;
-            }
-
-            // Show loading state
-            const thisWeekSlots = document.getElementById('thisWeekSlots');
-            const nextWeekSlots = document.getElementById('nextWeekSlots');
-            thisWeekSlots.innerHTML = '<div style="text-align: center; padding: 20px;">⏳ Loading available times...</div>';
-            nextWeekSlots.innerHTML = '';
-
-            // Load real availability or generate mock slots
-            if (currentServiceId) {
-                await loadRealAvailability();
-            } else {
-                await generateMockTimeSlots();
-            }
-            
-            document.getElementById('step1').classList.add('hidden');
-            document.getElementById('step2').classList.remove('hidden');
-        }
-
-        async function loadRealAvailability() {
-            try {
-                const today = new Date();
-                const endDate = new Date(today.getTime() + 14 * 24 * 60 * 60 * 1000); // 2 weeks from now
-                
-                const params = new URLSearchParams({
-                    service_id: currentServiceId,
-                    date: today.toISOString().split('T')[0],
-                    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'
+        function trackBookingClick() {
+            // Track booking button clicks for analytics
+            if (typeof gtag !== 'undefined') {
+                gtag('event', 'click', {
+                    event_category: 'Booking',
+                    event_label: 'Zoho Bookings Button',
+                    value: 1
                 });
-
-                const response = await fetch('/api/bookings/availability?' + params);
-                const result = await response.json();
-                
-                if (result.success && result.availability) {
-                    displayRealAvailability(result.availability);
-                } else {
-                    console.warn('No availability data, using mock slots');
-                    await generateMockTimeSlots();
-                }
-            } catch (error) {
-                console.error('Error loading availability:', error);
-                await generateMockTimeSlots();
             }
-        }
-
-        function displayRealAvailability(availability) {
-            const thisWeekSlots = document.getElementById('thisWeekSlots');
-            const nextWeekSlots = document.getElementById('nextWeekSlots');
             
-            thisWeekSlots.innerHTML = '';
-            nextWeekSlots.innerHTML = '';
-
-            // Parse Zoho availability data
-            if (availability.available_slots) {
-                const slots = availability.available_slots;
-                const now = new Date();
-                const oneWeekFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
-
-                slots.forEach(slot => {
-                    const slotDate = new Date(slot.date_time);
-                    const slotElement = createRealTimeSlot(slot);
-                    
-                    if (slotDate <= oneWeekFromNow) {
-                        thisWeekSlots.appendChild(slotElement);
-                    } else {
-                        nextWeekSlots.appendChild(slotElement);
-                    }
-                });
-
-                if (thisWeekSlots.children.length === 0) {
-                    thisWeekSlots.innerHTML = '<div style="text-align: center; color: #666;">No slots available this week</div>';
-                }
-                
-                if (nextWeekSlots.children.length === 0) {
-                    nextWeekSlots.innerHTML = '<div style="text-align: center; color: #666;">No slots available next week</div>';
-                }
-            } else {
-                // Fallback to mock slots if real data format is unexpected
-                console.log('Unexpected availability format, using mock slots');
-                generateMockTimeSlots();
-            }
-        }
-
-        function createRealTimeSlot(slotData) {
-            const slot = document.createElement('div');
-            slot.className = 'time-slot';
-            
-            const slotDate = new Date(slotData.date_time);
-            const timeStr = slotDate.toLocaleTimeString('en-GB', { 
-                hour: '2-digit', 
-                minute: '2-digit' 
-            });
-            const dateStr = slotDate.toLocaleDateString('en-GB', { 
-                weekday: 'short', 
-                month: 'short', 
-                day: 'numeric' 
-            });
-            
-            slot.innerHTML = \`
-                <div>\${timeStr}</div>
-                <div style="font-size: 12px; color: #666;">\${dateStr}</div>
-            \`;
-            
-            const displayText = \`\${timeStr} on \${dateStr}\`;
-            slot.onclick = () => selectRealTimeSlot(slot, slotData, displayText);
-            
-            return slot;
-        }
-
-        function selectRealTimeSlot(element, slotData, displayText) {
-            // Remove previous selection
-            document.querySelectorAll('.time-slot').forEach(slot => {
-                slot.classList.remove('selected');
-            });
-            
-            // Select new slot
-            element.classList.add('selected');
-            selectedSlotData = slotData;
-            selectedTimeSlot = slotData.date_time;
-            
-            // Show selected time
-            document.getElementById('selectedTimeText').textContent = displayText;
-            document.getElementById('selectedDateText').textContent = '30 minutes • AI Strategy Call';
-            document.getElementById('selectedTimeDisplay').classList.remove('hidden');
-            document.getElementById('confirmBookingBtn').disabled = false;
-        }
-
-        async function generateMockTimeSlots() {
-            const thisWeekSlots = document.getElementById('thisWeekSlots');
-            const nextWeekSlots = document.getElementById('nextWeekSlots');
-            
-            thisWeekSlots.innerHTML = '';
-            nextWeekSlots.innerHTML = '';
-
-            const now = new Date();
-            const timeSlots = ['09:00', '10:00', '11:00', '14:00', '15:00', '16:00'];
-            
-            // This week slots
-            for (let i = 1; i <= 5; i++) {
-                const date = new Date(now);
-                date.setDate(now.getDate() + i);
-                
-                if (date.getDay() >= 1 && date.getDay() <= 5) { // Weekdays only
-                    timeSlots.forEach(time => {
-                        const slot = createMockTimeSlot(date, time);
-                        thisWeekSlots.appendChild(slot);
-                    });
-                }
-            }
-
-            // Next week slots
-            const nextWeek = new Date(now);
-            nextWeek.setDate(now.getDate() + 7);
-            
-            for (let i = 1; i <= 5; i++) {
-                const date = new Date(nextWeek);
-                date.setDate(nextWeek.getDate() + i);
-                
-                if (date.getDay() >= 1 && date.getDay() <= 5) { // Weekdays only
-                    timeSlots.forEach(time => {
-                        const slot = createMockTimeSlot(date, time);
-                        nextWeekSlots.appendChild(slot);
-                    });
-                }
-            }
-        }
-
-        function createMockTimeSlot(date, time) {
-            const slot = document.createElement('div');
-            slot.className = 'time-slot';
-            
-            const dateStr = date.toLocaleDateString('en-GB', { 
-                weekday: 'short', 
-                month: 'short', 
-                day: 'numeric' 
-            });
-            
-            slot.innerHTML = \`
-                <div>\${time}</div>
-                <div style="font-size: 12px; color: #666;">\${dateStr}</div>
-            \`;
-            
-            // Create ISO datetime for mock booking
-            const [hours, minutes] = time.split(':');
-            const datetime = new Date(date);
-            datetime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
-            
-            const displayText = \`\${time} on \${dateStr}\`;
-            slot.onclick = () => selectMockTimeSlot(slot, datetime.toISOString(), displayText);
-            
-            return slot;
-        }
-
-        function selectMockTimeSlot(element, datetime, displayText) {
-            // Remove previous selection
-            document.querySelectorAll('.time-slot').forEach(slot => {
-                slot.classList.remove('selected');
-            });
-            
-            // Select new slot
-            element.classList.add('selected');
-            selectedTimeSlot = datetime;
-            selectedSlotData = null; // No real slot data for mock
-            
-            // Show selected time
-            document.getElementById('selectedTimeText').textContent = displayText;
-            document.getElementById('selectedDateText').textContent = '30 minutes • AI Strategy Call';
-            document.getElementById('selectedTimeDisplay').classList.remove('hidden');
-            document.getElementById('confirmBookingBtn').disabled = false;
-        }
-
-        async function confirmBooking() {
-            if (!selectedTimeSlot) {
-                alert('Please select a time slot');
-                return;
-            }
-
-            try {
-                const confirmBtn = document.getElementById('confirmBookingBtn');
-                confirmBtn.disabled = true;
-                confirmBtn.textContent = 'Creating Booking...';
-
-                if (currentServiceId && selectedSlotData) {
-                    // Use real Zoho Bookings API
-                    await confirmZohoBooking();
-                } else {
-                    // Fallback to calendar booking
-                    await confirmCalendarBooking();
-                }
-            } catch (error) {
-                console.error('Booking error:', error);
-                alert('Booking failed. Please try again or contact me directly.');
-                const confirmBtn = document.getElementById('confirmBookingBtn');
-                confirmBtn.disabled = false;
-                confirmBtn.textContent = 'Confirm Booking';
-            }
-        }
-
-        async function confirmZohoBooking() {
-            const bookingData = {
-                service_id: currentServiceId,
-                appointment_date_time: selectedTimeSlot,
-                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC',
-                ...bookingFormData
-            };
-
-            const response = await fetch('/api/bookings/create', {
+            // Also track via our analytics endpoint
+            fetch('/api/analytics/track', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(bookingData)
-            });
-
-            const result = await response.json();
-
-            if (result.success) {
-                document.getElementById('finalTimeDisplay').textContent = 
-                    document.getElementById('selectedTimeText').textContent;
-                
-                document.getElementById('step2').classList.add('hidden');
-                document.getElementById('step3').classList.remove('hidden');
-                
-                // Update success message for Zoho Bookings
-                const successElement = document.querySelector('.booking-success p');
-                successElement.textContent = 'Your meeting has been automatically scheduled! You will receive confirmation and calendar invites shortly.';
-            } else {
-                throw new Error(result.error || 'Zoho booking failed');
-            }
-        }
-
-        async function confirmCalendarBooking() {
-            const bookingData = {
-                ...bookingFormData,
-                timeSlot: selectedTimeSlot,
-                meetingType: 'AI Strategy Consultation'
-            };
-
-            const response = await fetch('/api/calendar/book', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(bookingData)
-            });
-
-            const result = await response.json();
-
-            if (result.success) {
-                document.getElementById('finalTimeDisplay').textContent = 
-                    document.getElementById('selectedTimeText').textContent;
-                
-                document.getElementById('step2').classList.add('hidden');
-                document.getElementById('step3').classList.remove('hidden');
-            } else {
-                throw new Error(result.error || 'Calendar booking failed');
-            }
-        }
-
-        function resetBookingForm() {
-            document.getElementById('bookingForm').reset();
-            selectedTimeSlot = null;
-            selectedSlotData = null;
-            bookingFormData = {};
-            document.getElementById('selectedTimeDisplay').classList.add('hidden');
-            const confirmBtn = document.getElementById('confirmBookingBtn');
-            confirmBtn.disabled = true;
-            confirmBtn.textContent = 'Confirm Booking';
-            showContactForm();
-        }
-
-        // Close modal when clicking outside
-        window.onclick = function(event) {
-            const modal = document.getElementById('bookingModal');
-            if (event.target === modal) {
-                closeBookingModal();
-            }
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    event: 'booking_link_clicked',
+                    source: 'booking_section',
+                    timestamp: new Date().toISOString()
+                })
+            }).catch(console.error);
         }
     </script>
-
-    <script src="/ai-consultancy.js"></script>
-    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </body>
 </html>`;
 } 

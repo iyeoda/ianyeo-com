@@ -1,7 +1,7 @@
 # Cloudflare Workers configuration for ianyeo.com
 
 name = "ianyeo-com"
-main = "workers-site/index.js"
+main = "worker.js"
 compatibility_date = "2024-01-01"
 
 
@@ -58,7 +58,7 @@ GA4_MEASUREMENT_ID = "your-ga4-measurement-id"
 
 # Zoho Bookings API configuration
 ZOHO_BOOKINGS_API_URL = "https://www.zohoapis.com/bookings/v1"
-ZOHO_BOOKINGS_CLIENT_ID = "your-zoho-bookings-client-id"
+ZOHO_BOOKINGS_CLIENT_ID = "1000.Y29FWY9M8MKMB0Z2Y0VNGKLKUZ1G3U"
 
 # =============================================================================
 # SECURITY NOTE: All secrets are managed via `wrangler secret put` command

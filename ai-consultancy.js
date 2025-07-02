@@ -68,11 +68,21 @@ class AIConsultingPage {
       assessmentForm.addEventListener('submit', this.handleAssessmentSubmission.bind(this));
     }
 
-    // Calendar booking form
-    const bookingForm = document.getElementById('booking-form');
-    if (bookingForm) {
-      bookingForm.addEventListener('submit', this.handleBookingSubmission.bind(this));
-    }
+    // Simplified booking tracking - Zoho Bookings handles the booking flow
+    this.initializeBookingTracking();
+  }
+
+  initializeBookingTracking() {
+    // Track booking button clicks for analytics
+    const bookingButtons = document.querySelectorAll('.booking-cta, [href*="bookings.zoho.com"]');
+    bookingButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        this.trackEvent('booking_link_clicked', {
+          source: button.closest('section')?.id || 'unknown',
+          buttonText: button.textContent.trim()
+        });
+      });
+    });
   }
 
   initializeAssessment() {
@@ -365,86 +375,7 @@ class AIConsultingPage {
     `;
   }
 
-  async handleBookingSubmission(event) {
-    event.preventDefault();
-    
-    const form = event.target;
-    const formData = new FormData(form);
-    const data = Object.fromEntries(formData);
-    
-    // Add session and tracking data
-    data.sessionId = this.sessionId;
-    data.source = 'ai-consultancy-booking-form';
-    data.timeOnPage = Date.now() - this.startTime;
-    
-    try {
-      this.setFormLoading(form, true);
-      
-      // Try Zoho Bookings first, fallback to calendar booking
-      let response;
-      try {
-        // Get available services
-        const servicesResponse = await fetch(`${this.apiBase}/bookings/services`);
-        const servicesResult = await servicesResponse.json();
-        
-        if (servicesResult.success && servicesResult.services?.length > 0) {
-          // Use Zoho Bookings API
-          const bookingData = {
-            service_id: servicesResult.services[0].service_id,
-            appointment_date_time: data.preferredTime || new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(), // Default to 2 days from now
-            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC',
-            firstName: data.firstName,
-            lastName: data.lastName,
-            email: data.email,
-            company: data.company,
-            phone: data.phone,
-            message: data.message
-          };
-          
-          response = await fetch(`${this.apiBase}/bookings/create`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(bookingData)
-          });
-        } else {
-          throw new Error('No Zoho Bookings services available');
-        }
-      } catch (zohoError) {
-        console.warn('Zoho Bookings not available, using calendar booking:', zohoError.message);
-        
-        // Fallback to calendar booking
-        response = await fetch(`${this.apiBase}/calendar/book`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            ...data,
-            meetingType: 'AI Strategy Consultation',
-            timeSlot: data.preferredTime || 'To be scheduled'
-          })
-        });
-      }
 
-      const result = await response.json();
-      
-      if (result.success) {
-        this.showSuccess(form, result.message || 'Booking request submitted successfully!');
-        this.trackConversion('booking_requested', data);
-        
-        // Hide form and show thank you message
-        setTimeout(() => {
-          form.style.display = 'none';
-          this.showThankYouMessage(form.parentNode, 'booking');
-        }, 2000);
-      } else {
-        throw new Error(result.error || 'Booking failed');
-      }
-    } catch (error) {
-      console.error('Booking submission error:', error);
-      this.showError(form, 'Booking failed. Please try again or contact me directly.');
-    } finally {
-      this.setFormLoading(form, false);
-    }
-  }
 
   showThankYouMessage(container, type) {
     const thankYouHtml = `

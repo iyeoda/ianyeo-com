@@ -467,23 +467,96 @@
         </div>
     </section>
 
-    <!-- CTA Section -->
-    <section id="consultation" class="cta-section">
+    <!-- Booking Section -->
+    <section id="booking" class="booking-section">
         <div class="container">
-            <div class="cta-content">
-                <h2>Ready to Lead Your Industry with AI?</h2>
-                <p>Book a free 30-minute strategy session to discuss your specific challenges and opportunities.</p>
-                <div class="cta-buttons">
-                    <a href="#booking" class="btn-primary cta-primary" data-position="final-cta">
-                        Book Free Strategy Session
-                    </a>
-                    <a href="#assessment" class="btn-secondary cta-secondary" data-position="final-cta">
-                        Take Assessment First
-                    </a>
+            <div class="booking-content">
+                <h2>Book Your Free Strategy Session</h2>
+                <p>Schedule a 30-minute consultation to discuss your AI transformation journey with Ian Yeo directly.</p>
+                
+                <div class="booking-container">
+                    <div class="booking-info">
+                        <h3>What You'll Get:</h3>
+                        <ul>
+                            <li>✅ Custom AI readiness assessment for your business</li>
+                            <li>✅ Specific recommendations for your industry</li>
+                            <li>✅ ROI projections for AI implementations</li>
+                            <li>✅ Clear roadmap for getting started</li>
+                            <li>✅ Access to exclusive resources and case studies</li>
+                        </ul>
+                        
+                        <div class="booking-testimonial">
+                            <blockquote>
+                                "Ian's insights helped us identify £2M in cost savings through AI automation. 
+                                The strategy session was invaluable."
+                            </blockquote>
+                            <cite>— Sarah Johnson, CEO, BuildTech Solutions</cite>
+                        </div>
+                    </div>
+                    
+                    <div class="booking-form-container">
+                        <!-- Zoho Bookings Embedded Widget -->
+                        <div class="zoho-booking-widget">
+                            <div class="booking-widget-header">
+                                <h3>Schedule Your Strategy Session</h3>
+                                <p>Choose a convenient time for your free 30-minute AI consultation with Ian Yeo.</p>
+                            </div>
+                            
+                            <!-- Option 1: Direct Booking Button (Recommended) -->
+                            <div class="booking-button-container">
+                                <a href="https://ianyeo.zohobookings.com/#/ai-strategy-consultation" 
+                                   target="_blank" 
+                                   class="btn-primary booking-cta"
+                                   onclick="aiConsulting.trackEvent('booking_link_clicked', { source: 'booking_section' })">
+                                    📅 Book Free Strategy Session
+                                </a>
+                                <p class="booking-notice">
+                                    Opens in a new window • Secure Zoho Bookings powered • Instant calendar sync
+                                </p>
+                            </div>
+                            
+                            <!-- Option 2: Embedded iframe (Alternative) -->
+                            <div class="booking-iframe-container" style="display: none;">
+                                <iframe src="https://ianyeo.zohobookings.com/#/ai-strategy-consultation" 
+                                        width="100%" 
+                                        height="600" 
+                                        frameborder="0" 
+                                        scrolling="auto"
+                                        title="Book AI Strategy Consultation">
+                                </iframe>
+                            </div>
+                            
+                            <!-- Booking Benefits Reminder -->
+                            <div class="booking-benefits">
+                                <h4>What happens next?</h4>
+                                <div class="benefit-steps">
+                                    <div class="step">
+                                        <span class="step-number">1</span>
+                                        <span class="step-text">Choose your preferred time slot</span>
+                                    </div>
+                                    <div class="step">
+                                        <span class="step-number">2</span>
+                                        <span class="step-text">Receive calendar invite & confirmation email</span>
+                                    </div>
+                                    <div class="step">
+                                        <span class="step-number">3</span>
+                                        <span class="step-text">Join the call for your personalized AI strategy session</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Alternative Contact Option -->
+                            <div class="alternative-contact">
+                                <p>Prefer to discuss over email first? <a href="#assessment" class="text-link">Take the AI Assessment</a> or <a href="mailto:ian@ianyeo.com" class="text-link">send a message</a>.</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
+
+
 
     <!-- Footer -->
     <footer class="footer">

@@ -215,18 +215,41 @@ async function handleBlogListing(request, env) {
     const blogPosts = await getBlogPosts(env);
     
     const postsHtml = blogPosts.map(post => `
-      <div class="blog-post-summary">
-        <h2><a href="/blog/${post.slug}">${post.title}</a></h2>
-        <p class="blog-date">${new Date(post.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
-        <p>${post.excerpt}</p>
-        <a href="/blog/${post.slug}" class="read-more">Read More &rarr;</a>
-      </div>
+      <article class="blog-post" data-slug="${post.slug}">
+        <div class="blog-meta">
+          <span class="blog-date">${new Date(post.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+          <span class="blog-category">${post.category || 'Insights'}</span>
+        </div>
+        <h3 class="blog-title">${post.title}</h3>
+        <p class="blog-excerpt">${post.excerpt}</p>
+        <a href="#" class="blog-read-more" data-slug="${post.slug}">
+          Read More
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M5 12h14m-7-7 7 7-7 7"/>
+          </svg>
+        </a>
+      </article>
     `).join('');
 
     const htmlContent = `
-      <section class="blog-listing">
-        <h1>Latest Insights & News</h1>
-        ${postsHtml}
+      <section id="news">
+        <div class="container">
+          <div class="section-header">
+            <h1 class="section-title">Latest Insights & News</h1>
+            <p class="section-subtitle">Insights on technology leadership, AI innovation, and industry trends</p>
+          </div>
+          <div class="blog-grid" id="blog-posts">
+            ${postsHtml}
+          </div>
+          <div class="blog-actions">
+            <a href="#" class="btn btn-secondary" id="view-all-posts">
+              View All Posts
+              <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M5 12h14m-7-7 7 7-7 7"/>
+              </svg>
+            </a>
+          </div>
+        </div>
       </section>
     `;
     
@@ -249,13 +272,27 @@ async function handleBlogPost(request, env, slug) {
     const postHtml = marked.parse(content);
 
     const htmlContent = `
-      <section class="blog-post">
-        <h1 class="blog-title">${frontMatter.title}</h1>
-        <p class="blog-meta">Published on ${new Date(frontMatter.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })} | Category: ${frontMatter.category}</p>
-        <div class="blog-content">
-          ${postHtml}
+      <section id="news">
+        <div class="container">
+          <div class="blog-post" data-slug="${slug}">
+            <div class="blog-meta">
+              <span class="blog-date">${new Date(frontMatter.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+              <span class="blog-category">${frontMatter.category || 'Insights'}</span>
+            </div>
+            <h1 class="blog-title">${frontMatter.title}</h1>
+            <div class="blog-content">
+              ${postHtml}
+            </div>
+            <div class="blog-actions">
+              <a href="/blog" class="btn btn-secondary">
+                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path d="M19 12H5m7 7-7-7 7-7"/>
+                </svg>
+                Back to all posts
+              </a>
+            </div>
+          </div>
         </div>
-        <p><a href="/blog" class="back-to-blog">&larr; Back to all posts</a></p>
       </section>
     `;
 
@@ -268,8 +305,6 @@ async function handleBlogPost(request, env, slug) {
 }
 
 async function renderBlogPage(contentHtml, title, env) {
-  // This template should ideally be loaded from a file or R2 for better management
-  // For now, it's embedded for simplicity.
   return new Response(`
     <!DOCTYPE html>
     <html lang="en">
@@ -292,6 +327,9 @@ async function renderBlogPage(contentHtml, title, env) {
       <meta name="twitter:card" content="summary_large_image">
     </head>
     <body>
+      <!-- Canvas Background -->
+      <canvas id="bg-canvas"></canvas>
+      
       <header>
         <nav>
           <a href="/" class="logo">Ian Yeo</a>
@@ -303,21 +341,276 @@ async function renderBlogPage(contentHtml, title, env) {
         </nav>
       </header>
 
-      <main class="blog-main">
+      <main>
         ${contentHtml}
       </main>
 
-      <footer>
-        <div class="footer-content">
-          <p>&copy; ${new Date().getFullYear()} Ian Yeo. All rights reserved.</p>
-          <div class="social-links">
-            <a href="https://linkedin.com/in/ianyeo" target="_blank" rel="noopener noreferrer">LinkedIn</a>
-            <a href="https://twitter.com/ianyeo" target="_blank" rel="noopener noreferrer">Twitter</a>
+      <!-- Contact Section -->
+      <footer class="contact-section" id="contact">
+        <div class="container">
+          <div class="section-header">
+            <h2 class="section-title">Let's Connect</h2>
+            <p class="section-subtitle">Seeking C‑Suite, PE/VC Operating Partner, or Strategic Advisory roles</p>
+          </div>
+          <div class="contact-grid">
+            <a href="mailto:ian@ianyeo.com" class="contact-card" aria-label="Send an email">
+              <span class="contact-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <rect width="20" height="16" x="2" y="4" rx="2"/>
+                  <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+                </svg>
+              </span>
+              <div class="contact-title">Email</div>
+              <p class="contact-value">ian@ianyeo.com</p>
+            </a>
+            <a href="https://linkedin.com/in/iankyeo" class="contact-card" target="_blank" rel="noopener" aria-label="LinkedIn profile">
+              <span class="contact-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
+                  <rect width="4" height="12" x="2" y="9"/>
+                  <circle cx="4" cy="4" r="2"/>
+                </svg>
+              </span>
+              <div class="contact-title">LinkedIn</div>
+              <p class="contact-value">linkedin.com/in/iankyeo</p>
+            </a>
+            <a href="tel:+447753811081" class="contact-card" aria-label="Call Ian">
+              <span class="contact-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                </svg>
+              </span>
+              <div class="contact-title">Phone</div>
+              <p class="contact-value">+44 7753 811081</p>
+            </a>
           </div>
         </div>
       </footer>
+
+      <!-- Blog Modal -->
+      <div class="blog-modal" id="blog-modal">
+        <div class="blog-modal-content">
+          <div class="blog-modal-header">
+            <div class="blog-modal-meta">
+              <span class="blog-category" id="modal-category"></span>
+              <span class="blog-date" id="modal-date"></span>
+            </div>
+            <button class="blog-modal-close" id="modal-close" aria-label="Close blog post">
+              <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          </div>
+          <div class="blog-modal-body">
+            <div class="blog-content" id="modal-content">
+              <!-- Blog content will be loaded here -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- All Posts Modal -->
+      <div class="all-posts-modal" id="all-posts-modal">
+        <div class="all-posts-modal-content">
+          <div class="all-posts-modal-header">
+            <h2 class="all-posts-modal-title">All Posts</h2>
+            <button class="all-posts-modal-close" id="all-posts-close" aria-label="Close all posts">
+              <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          </div>
+          <div class="all-posts-modal-body">
+            <div class="all-posts-grid" id="all-posts-grid">
+              <!-- All posts will be dynamically inserted here -->
+            </div>
+          </div>
+        </div>
+      </div>
+
       <script src="/script.js"></script>
-      <script src="/ai-consultancy.js"></script>
+      <script>
+        // Blog-specific JavaScript initialization
+        document.addEventListener('DOMContentLoaded', function() {
+          // Initialize blog post click handlers
+          initializeBlogPage();
+        });
+        
+        async function initializeBlogPage() {
+          try {
+            // Load all blog posts for modal functionality
+            const blogPosts = await fetch('/api/blog/posts').then(r => r.json()).catch(() => []);
+            
+            // Handle individual blog post clicks
+            document.querySelectorAll('.blog-post').forEach(post => {
+              const slug = post.dataset.slug;
+              
+              // Make entire card clickable
+              post.addEventListener('click', async (e) => {
+                e.preventDefault();
+                await openBlogPostModal(slug);
+              });
+              
+              // Handle read more button specifically
+              const readMoreBtn = post.querySelector('.blog-read-more');
+              if (readMoreBtn) {
+                readMoreBtn.addEventListener('click', async (e) => {
+                  e.stopPropagation(); // Prevent double trigger
+                  e.preventDefault();
+                  await openBlogPostModal(slug);
+                });
+              }
+            });
+            
+            // Handle view all posts button
+            const viewAllBtn = document.getElementById('view-all-posts');
+            if (viewAllBtn) {
+              viewAllBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                openAllPostsModal();
+              });
+            }
+            
+            // Modal close handlers
+            const modalClose = document.getElementById('modal-close');
+            const allPostsClose = document.getElementById('all-posts-close');
+            const blogModal = document.getElementById('blog-modal');
+            const allPostsModal = document.getElementById('all-posts-modal');
+            
+            if (modalClose) {
+              modalClose.addEventListener('click', closeBlogModal);
+            }
+            
+            if (allPostsClose) {
+              allPostsClose.addEventListener('click', closeAllPostsModal);
+            }
+            
+            // Close modals when clicking outside
+            if (blogModal) {
+              blogModal.addEventListener('click', (e) => {
+                if (e.target === blogModal) closeBlogModal();
+              });
+            }
+            
+            if (allPostsModal) {
+              allPostsModal.addEventListener('click', (e) => {
+                if (e.target === allPostsModal) closeAllPostsModal();
+              });
+            }
+            
+          } catch (error) {
+            console.error('Error initializing blog page:', error);
+          }
+        }
+        
+        async function openBlogPostModal(slug) {
+          try {
+            // Get blog post content
+            const response = await fetch(\`/blog/\${slug}\`);
+            if (!response.ok) throw new Error('Failed to fetch post');
+            
+            const html = await response.text();
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            
+            // Extract content
+            const blogSection = doc.querySelector('.blog-post');
+            if (blogSection) {
+              const title = blogSection.querySelector('.blog-title')?.textContent || '';
+              const meta = blogSection.querySelector('.blog-meta')?.textContent || '';
+              const content = blogSection.querySelector('.blog-content')?.innerHTML || '';
+              
+              // Update modal
+              document.getElementById('modal-category').textContent = 'Insights';
+              document.getElementById('modal-date').textContent = meta;
+              document.getElementById('modal-content').innerHTML = \`<h1>\${title}</h1>\${content}\`;
+              
+              // Show modal
+              document.getElementById('blog-modal').classList.add('active');
+              document.body.style.overflow = 'hidden';
+            }
+          } catch (error) {
+            console.error('Error opening blog post:', error);
+          }
+        }
+        
+        function closeBlogModal() {
+          document.getElementById('blog-modal').classList.remove('active');
+          document.body.style.overflow = '';
+        }
+        
+        function openAllPostsModal() {
+          // This will use the existing modal structure
+          document.getElementById('all-posts-modal').classList.add('active');
+          document.body.style.overflow = 'hidden';
+          
+          // Load all posts in the modal
+          loadAllPostsInModal();
+        }
+        
+        function closeAllPostsModal() {
+          document.getElementById('all-posts-modal').classList.remove('active');
+          document.body.style.overflow = '';
+        }
+        
+        async function loadAllPostsInModal() {
+          try {
+            const container = document.getElementById('all-posts-grid');
+            container.innerHTML = '<div class="blog-loading"><div class="loading-spinner"></div><p>Loading posts...</p></div>';
+            
+            // Get all posts (we'll use the current page data)
+            const posts = Array.from(document.querySelectorAll('.blog-post')).map(post => {
+              const title = post.querySelector('.blog-title')?.textContent || '';
+              const excerpt = post.querySelector('.blog-excerpt')?.textContent || '';
+              const date = post.querySelector('.blog-date')?.textContent || '';
+              const category = post.querySelector('.blog-category')?.textContent || 'Insights';
+              const slug = post.dataset.slug;
+              
+              return { title, excerpt, date, category, slug };
+            });
+            
+            if (posts.length === 0) {
+              container.innerHTML = '<p>No posts available.</p>';
+              return;
+            }
+            
+            const postsHtml = posts.map(post => \`
+              <article class="all-posts-item" data-slug="\${post.slug}">
+                <div class="all-posts-item-meta">
+                  <span class="all-posts-item-date">\${post.date}</span>
+                  <span class="all-posts-item-category">\${post.category}</span>
+                </div>
+                <h3 class="all-posts-item-title">\${post.title}</h3>
+                <p class="all-posts-item-excerpt">\${post.excerpt}</p>
+                <a href="#" class="all-posts-item-read-more" data-slug="\${post.slug}">
+                  Read More
+                  <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path d="M5 12h14m-7-7 7 7-7 7"/>
+                  </svg>
+                </a>
+              </article>
+            \`).join('');
+            
+            container.innerHTML = postsHtml;
+            
+            // Add click handlers for modal posts
+            container.querySelectorAll('.all-posts-item').forEach(item => {
+              const slug = item.dataset.slug;
+              item.addEventListener('click', async (e) => {
+                e.preventDefault();
+                closeAllPostsModal();
+                await openBlogPostModal(slug);
+              });
+            });
+            
+          } catch (error) {
+            console.error('Error loading all posts:', error);
+            document.getElementById('all-posts-grid').innerHTML = '<p>Error loading posts.</p>';
+          }
+        }
+      </script>
     </body>
     </html>
   `, {

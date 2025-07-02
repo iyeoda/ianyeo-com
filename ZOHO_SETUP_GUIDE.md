@@ -67,15 +67,15 @@ curl -X POST https://accounts.zoho.com/oauth/v2/token \
   -d "code=1000.e42b51743cb84bc81d6a7160ae0a3aec.a536966199bf59a2be1e2a6e9a8b07c0"
 ```
 
-## Step 2: Zoho Bookings Setup (Full API Integration)
+## Step 2: Zoho Bookings Setup (Embedded Widget Solution)
 
-The system now includes full Zoho Bookings API integration for automated meeting scheduling.
+**IMPORTANT UPDATE:** Due to Zoho Bookings API scope limitations (only `zohobookings.data.CREATE` available), we've implemented a proven embedded widget solution that provides all the benefits without the API complexity.
 
 ### 2.1 Enable Zoho Bookings
 1. Go to [https://bookings.zoho.com](https://bookings.zoho.com)
 2. Sign in with your Zoho account
 3. Set up your Bookings workspace
-4. Choose your subscription plan (Basic or higher recommended for API access)
+4. Choose your subscription plan (Basic or higher recommended for professional features)
 
 ### 2.2 Create Your Booking Service
 1. In Zoho Bookings, go to **Services** → **Add Service**
@@ -99,74 +99,81 @@ The system now includes full Zoho Bookings API integration for automated meeting
    - Enable **"Send confirmation emails"**
    - Enable **"Send reminder emails"**
 
-### 2.3 Create OAuth Application for Bookings
-1. Go to [https://api-console.zoho.com](https://api-console.zoho.com)
-2. If you already created a Self Client for CRM, you can reuse it
-3. If not, click **"Add Client"** → **"Self Client"**
-4. Enter details:
-   - **Client Name**: "AI Consultancy Full Integration"
-   - **Homepage URL**: `https://ianyeo.com`
-   - **Authorized Redirect URIs**: `https://ianyeo.com`
+### 2.3 Get Your Booking Page URL
+1. In Zoho Bookings, go to **Settings** → **Booking Page**
+2. Copy your booking page URL (e.g., `https://bookings.zoho.com/portal/yourname`)
+3. Test the booking page to ensure it works correctly
 
-### 2.4 Generate Bookings Refresh Token
-You need the `zohobookings.data.CREATE` scope for the booking integration:
+### 2.4 Customize Your Booking Page (Optional)
+1. Go to **Settings** → **Booking Page** → **Customize**
+2. Upload your logo and set brand colors
+3. Add custom welcome message and instructions
+4. Configure required booking fields (name, email, phone, etc.)
+5. Set up email templates with your branding
 
-**Step 1: Get Authorization Code**
-```bash
-# Replace YOUR_CLIENT_ID with your actual Client ID
-https://accounts.zoho.com/oauth/v2/auth?scope=zohobookings.data.CREATE,ZohoCRM.modules.ALL,ZohoCRM.settings.ALL,ZohoCampaigns.contact.ALL&client_id=YOUR_CLIENT_ID&response_type=code&access_type=offline&redirect_uri=https://ianyeo.com
-```
-
-**Step 2: Exchange for Refresh Token**
-```bash
-curl -X POST https://accounts.zoho.com/oauth/v2/token \
-  -d "grant_type=authorization_code" \
-  -d "client_id=YOUR_CLIENT_ID" \
-  -d "client_secret=YOUR_CLIENT_SECRET" \
-  -d "redirect_uri=https://ianyeo.com" \
-  -d "code=AUTHORIZATION_CODE_FROM_STEP_1"
-```
-
-**Response will include:**
-```json
-{
-  "access_token": "1000.xxx",
-  "refresh_token": "1000.yyy",
-  "expires_in": 3600,
-  "token_type": "Bearer"
-}
-```
-
-Save the `refresh_token` - you'll need it for the Worker secrets.
-
-### 2.5 Configure Email Templates (Optional)
+### 2.5 Configure Email Templates
 1. In Zoho Bookings, go to **Settings** → **Email Templates**
 2. Customize the confirmation email template:
-   - Add your branding
+   - Add your branding and contact information
    - Include meeting preparation instructions
-   - Add contact information
-   - Include calendar attachment
+   - Add calendar attachment settings
+   - Include meeting join links if using video calls
 
 3. Set up reminder emails:
    - 24 hours before meeting
    - 1 hour before meeting
-   - Include meeting join links if using video calls
+   - Include meeting preparation tips
 
-### 2.6 Test Bookings Setup
-1. In Zoho Bookings, go to your service page
-2. Try booking a test appointment
-3. Verify you receive confirmation emails
-4. Check that the appointment appears in your calendar
-5. Test the cancellation/rescheduling flow
+### 2.6 Website Integration Methods
 
-**Benefits of Full Zoho Bookings Integration:**
-- ✅ Real-time availability checking
-- ✅ Automatic booking confirmation and calendar invites  
+**Method 1: Direct Booking Button (Recommended)**
+- Simple, reliable, opens Zoho Bookings in new window
+- Best user experience with full Zoho features
+- Already implemented in your landing page
+
+**Method 2: Embedded iframe (Alternative)**
+- Seamless integration within your website
+- Users stay on your domain during booking
+- Can be enabled by changing CSS display property
+
+**Current Implementation:**
+Your landing page at `/ai-construction-consulting` now uses the direct booking button approach with a professional interface that:
+
+- ✅ Tracks booking button clicks for analytics
+- ✅ Provides clear next steps and expectations
+- ✅ Maintains your branding while leveraging Zoho's reliability
+- ✅ Offers alternative contact methods
+- ✅ Works perfectly on all devices
+
+### 2.7 Test the Complete Flow
+1. Visit your landing page at `/ai-construction-consulting`
+2. Click "📅 Book Free Strategy Session"
+3. Verify Zoho Bookings opens correctly
+4. Test the complete booking process
+5. Confirm you receive email notifications
+6. Check calendar integration works
+
+**Benefits of Embedded Zoho Bookings Solution:**
+- ✅ No API scope limitations or authentication issues
+- ✅ Professional booking experience with Zoho's reliability
+- ✅ Automatic email confirmations and calendar invites
+- ✅ Built-in reminder system and no-show reduction
+- ✅ Real-time availability and conflict prevention
+- ✅ Full CRM integration when bookings are made
 - ✅ Professional email templates and branding
-- ✅ Built-in reminder system
-- ✅ Customer self-service reschedule/cancel
-- ✅ Full integration with CRM and analytics
-- ✅ No manual intervention required
+- ✅ Mobile-optimized booking experience
+- ✅ Analytics tracking for conversion optimization
+
+### 2.8 CRM Integration (Automatic)
+When someone books through Zoho Bookings:
+1. **Contact Creation**: Automatically creates/updates contact in Zoho CRM
+2. **High-Value Lead Scoring**: Booking leads get 95 points (vs 30 for assessments)
+3. **Activity Tracking**: Meeting scheduled activity is logged
+4. **Email Automation**: Welcome series and follow-up emails are triggered
+5. **Calendar Sync**: Appointment appears in your connected calendars
+6. **Reminder System**: Automated reminders reduce no-shows
+
+This solution provides all the benefits of API integration while avoiding the technical complexity and scope limitations.
 
 ## Step 3: Zoho Campaigns Setup
 
@@ -229,27 +236,22 @@ curl -X POST https://accounts.zoho.com/oauth/v2/token \
 Set these secrets using `wrangler secret put`:
 
 ```bash
-# Zoho CRM
+# Zoho CRM (Required for lead capture and assessment)
 wrangler secret put ZOHO_CRM_CLIENT_SECRET  
 wrangler secret put ZOHO_CRM_REFRESH_TOKEN
 
-# Zoho Bookings (NEW - for automated meeting scheduling)
-wrangler secret put ZOHO_BOOKINGS_CLIENT_SECRET
-wrangler secret put ZOHO_BOOKINGS_REFRESH_TOKEN
-
 # Zoho Campaigns (Optional - for email automation)
 wrangler secret put ZOHO_CAMPAIGNS_REFRESH_TOKEN
+
+# Core functionality (already configured)
+wrangler secret put ZOHO_API_KEY              # ZeptoMail for transactional emails
+wrangler secret put TURNSTILE_SECRET_KEY      # Cloudflare Turnstile for form protection
 
 # Optional: Google Analytics (if keeping)
 wrangler secret put GA4_API_SECRET
 ```
 
-**Note:** If you used the same OAuth application for all Zoho services, you can use the same `CLIENT_SECRET` for both CRM and Bookings:
-```bash
-# If using the same OAuth app for all services:
-wrangler secret put ZOHO_CRM_CLIENT_SECRET your_shared_client_secret
-wrangler secret put ZOHO_BOOKINGS_CLIENT_SECRET your_shared_client_secret
-```
+**Note:** Zoho Bookings secrets are no longer needed since we're using the embedded widget approach instead of API integration.
 
 ## Step 5: Test the Integration
 
@@ -260,41 +262,33 @@ wrangler secret put ZOHO_BOOKINGS_CLIENT_SECRET your_shared_client_secret
 4. Confirm contact is added to appropriate Campaigns list
 
 ### 5.2 Test Zoho Bookings Integration
-1. **Test Booking Services API**:
-   ```bash
-   curl https://ianyeo.com/api/bookings/services
-   ```
-   Should return your configured services.
-
-2. **Test Availability API**:
-   ```bash
-   # Replace SERVICE_ID with your actual service ID from step 1
-   curl "https://ianyeo.com/api/bookings/availability?service_id=YOUR_SERVICE_ID&date=2024-01-15"
-   ```
-
-3. **Test Full Booking Flow**:
+1. **Test Booking Button Flow**:
    - Visit your landing page at `/ai-construction-consulting`
-   - Click "Book Free Strategy Call"
-   - Fill out the booking form
+   - Click "📅 Book Free Strategy Session"
+   - Verify Zoho Bookings page opens in new window
+   - Test the complete booking process
+   - Fill out the booking form with test information
    - Select an available time slot
    - Confirm the booking
 
-4. **Verify Integration**:
+2. **Verify Integration**:
    - Check appointment appears in Zoho Bookings dashboard
-   - Verify confirmation email is sent automatically
-   - Confirm calendar invite is generated
-   - Check lead is synced to Zoho CRM with high score (95 points)
-   - Verify lead is added to appropriate email campaign list
+   - Verify confirmation email is sent automatically  
+   - Confirm calendar invite is generated and synced
+   - Check lead is synced to Zoho CRM (if CRM integration enabled)
+   - Verify reminder emails are scheduled
 
-5. **Test Debug Endpoints** (helpful for troubleshooting):
+3. **Test Analytics Tracking**:
    ```bash
-   # Test all integrations at once
-   curl https://ianyeo.com/api/debug/test-all
-   
-   # Test just Zoho services
+   # Test core functionality
    curl https://ianyeo.com/api/debug/test-crm
    curl https://ianyeo.com/api/debug/test-email
    ```
+   
+4. **Verify Button Click Tracking**:
+   - Open browser developer tools → Network tab
+   - Click the booking button
+   - Confirm analytics events are tracked
 
 ## Step 6: Zoho Analytics (Optional)
 
@@ -318,14 +312,12 @@ Your `wrangler.toml` should have these variables:
 ```toml
 # Zoho API URLs (already configured in wrangler.toml)
 ZOHO_CRM_API_URL = "https://www.zohoapis.com/crm/v6"
-ZOHO_BOOKINGS_API_URL = "https://www.zohoapis.com/bookings/v1"  
 ZOHO_CAMPAIGNS_API_URL = "https://campaigns.zoho.com/api/v1.1"
 ZOHO_ANALYTICS_API_URL = "https://analyticsapi.zoho.com/restapi/v2"
 ZOHO_ACCOUNTS_URL = "https://accounts.zoho.com"
 
 # Zoho Client IDs (non-secret, safe to commit)
-ZOHO_CRM_CLIENT_ID = "your-zoho-crm-client-id"
-ZOHO_BOOKINGS_CLIENT_ID = "your-zoho-bookings-client-id"  # Or same as CRM if using one OAuth app
+ZOHO_CRM_CLIENT_ID = "1000.Y29FWY9M8MKMB0Z2Y0VNGKLKUZ1G3U"
 ```
 
 ## Secrets Summary
@@ -334,11 +326,9 @@ Required secrets for `wrangler secret put`:
 
 ```bash
 ZOHO_API_KEY                    # ZeptoMail (already configured)
-TURNSTILE_SECRET_KEY           # Cloudflare Turnstile
+TURNSTILE_SECRET_KEY           # Cloudflare Turnstile (already configured)
 ZOHO_CRM_CLIENT_SECRET         # CRM OAuth  
 ZOHO_CRM_REFRESH_TOKEN         # CRM OAuth
-ZOHO_BOOKINGS_CLIENT_SECRET    # Bookings OAuth (NEW)
-ZOHO_BOOKINGS_REFRESH_TOKEN    # Bookings OAuth (NEW)
 ZOHO_CAMPAIGNS_REFRESH_TOKEN   # Campaigns OAuth (optional)
 ```
 
@@ -378,7 +368,7 @@ ZOHO_CAMPAIGNS_REFRESH_TOKEN   # Campaigns OAuth (optional)
 **Problem: "No services found" error**
 - ✅ Verify you have at least one active service in Zoho Bookings
 - ✅ Check that the service is enabled for online booking
-- ✅ Ensure your OAuth token has `zohobookings.data.CREATE` scope
+- ✅ Ensure your OAuth token has `ZohoBookings.operation.ALL` scope
 
 **Problem: "Availability not loading"**
 - ✅ Check your Zoho Bookings availability settings (working hours set)

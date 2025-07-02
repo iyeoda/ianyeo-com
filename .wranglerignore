@@ -1,0 +1,10 @@
+downloaded-report.pdf
+test/
+qr_code_gen/
+*.md
+debug-test.sh
+deploy-production.sh
+setup-*.sh
+setup-*.js
+test-*.sh
+test-*.js 
