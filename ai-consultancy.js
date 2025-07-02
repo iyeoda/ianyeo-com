@@ -365,6 +365,87 @@ class AIConsultingPage {
     `;
   }
 
+  async handleBookingSubmission(event) {
+    event.preventDefault();
+    
+    const form = event.target;
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData);
+    
+    // Add session and tracking data
+    data.sessionId = this.sessionId;
+    data.source = 'ai-consultancy-booking-form';
+    data.timeOnPage = Date.now() - this.startTime;
+    
+    try {
+      this.setFormLoading(form, true);
+      
+      // Try Zoho Bookings first, fallback to calendar booking
+      let response;
+      try {
+        // Get available services
+        const servicesResponse = await fetch(`${this.apiBase}/bookings/services`);
+        const servicesResult = await servicesResponse.json();
+        
+        if (servicesResult.success && servicesResult.services?.length > 0) {
+          // Use Zoho Bookings API
+          const bookingData = {
+            service_id: servicesResult.services[0].service_id,
+            appointment_date_time: data.preferredTime || new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(), // Default to 2 days from now
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC',
+            firstName: data.firstName,
+            lastName: data.lastName,
+            email: data.email,
+            company: data.company,
+            phone: data.phone,
+            message: data.message
+          };
+          
+          response = await fetch(`${this.apiBase}/bookings/create`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(bookingData)
+          });
+        } else {
+          throw new Error('No Zoho Bookings services available');
+        }
+      } catch (zohoError) {
+        console.warn('Zoho Bookings not available, using calendar booking:', zohoError.message);
+        
+        // Fallback to calendar booking
+        response = await fetch(`${this.apiBase}/calendar/book`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ...data,
+            meetingType: 'AI Strategy Consultation',
+            timeSlot: data.preferredTime || 'To be scheduled'
+          })
+        });
+      }
+
+      const result = await response.json();
+      
+      if (result.success) {
+        this.showSuccess(form, result.message || 'Booking request submitted successfully!');
+        this.trackConversion('booking_requested', data);
+        
+        // Hide form and show thank you message
+        setTimeout(() => {
+          form.style.display = 'none';
+          this.showThankYouMessage(form.parentNode, 'booking');
+        }, 2000);
+      } else {
+        throw new Error(result.error || 'Booking failed');
+      }
+    } catch (error) {
+      console.error('Booking submission error:', error);
+      this.showError(form, 'Booking failed. Please try again or contact me directly.');
+    } finally {
+      this.setFormLoading(form, false);
+    }
+  }
+
   showThankYouMessage(container, type) {
     const thankYouHtml = `
       <div class="thank-you-message">
@@ -372,14 +453,23 @@ class AIConsultingPage {
         <h3>Thank You!</h3>
         <p>${type === 'lead' ? 
           'Your consultation request has been submitted. We\'ll be in touch within 24 hours.' : 
+          type === 'booking' ?
+          'Your booking request has been submitted. You\'ll receive confirmation shortly.' :
           'Your assessment has been completed successfully.'
         }</p>
         <div class="next-steps">
           <h4>What happens next?</h4>
           <ul>
-            <li>Check your email for confirmation and next steps</li>
-            <li>We'll review your information and prepare a customized approach</li>
-            <li>Expect a call or email within 24 hours to schedule your consultation</li>
+            ${type === 'booking' ? `
+              <li>You'll receive an email confirmation with meeting details</li>
+              <li>A calendar invite will be sent to your email</li>
+              <li>If using Zoho Bookings, your meeting is automatically scheduled</li>
+              <li>Prepare any questions about AI implementation for your business</li>
+            ` : `
+              <li>Check your email for confirmation and next steps</li>
+              <li>We'll review your information and prepare a customized approach</li>
+              <li>Expect a call or email within 24 hours to schedule your consultation</li>
+            `}
           </ul>
         </div>
       </div>

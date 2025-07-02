@@ -31,6 +31,9 @@
   ],
   "author": "Ian Yeo <ian@ianyeo.com>",
   "license": "MIT",
+  "dependencies": {
+    "marked": "^12.0.0"
+  },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20231025.0",
     "wrangler": "^4.19.1",

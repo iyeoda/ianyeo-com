@@ -2,7 +2,7 @@
 
 name = "ianyeo-com"
 compatibility_date = "2024-01-01"
-main = "worker.js"
+
 
 # KV Namespace for storing report access data
 [[kv_namespaces]]
@@ -55,6 +55,10 @@ ZOHO_ACCOUNTS_URL = "https://accounts.zoho.com"
 ZOHO_CRM_CLIENT_ID = "1000.Y29FWY9M8MKMB0Z2Y0VNGKLKUZ1G3U"
 GA4_MEASUREMENT_ID = "your-ga4-measurement-id"
 
+# Zoho Bookings API configuration
+ZOHO_BOOKINGS_API_URL = "https://www.zohoapis.com/bookings/v1"
+ZOHO_BOOKINGS_CLIENT_ID = "your-zoho-bookings-client-id"
+
 # =============================================================================
 # SECURITY NOTE: All secrets are managed via `wrangler secret put` command
 # DO NOT put actual secrets in this file - they are stored securely in Cloudflare
@@ -66,6 +70,8 @@ GA4_MEASUREMENT_ID = "your-ga4-measurement-id"
 # wrangler secret put ZOHO_CRM_REFRESH_TOKEN
 # wrangler secret put ZOHO_CAMPAIGNS_REFRESH_TOKEN
 # wrangler secret put GA4_API_SECRET
+# wrangler secret put ZOHO_BOOKINGS_CLIENT_SECRET
+# wrangler secret put ZOHO_BOOKINGS_REFRESH_TOKEN
 # =============================================================================
 
 # Routes for handling API requests
@@ -85,6 +91,26 @@ zone_name = "ianyeo.com"
 [[routes]]
 pattern = "www.ianyeo.com/ai-construction-consulting"
 zone_name = "ianyeo.com"
+
+# New routes for blog
+[[routes]]
+pattern = "ianyeo.com/blog"
+zone_name = "ianyeo.com"
+
+[[routes]]
+pattern = "ianyeo.com/blog/*"
+zone_name = "ianyeo.com"
+
+[[routes]]
+pattern = "www.ianyeo.com/blog"
+zone_name = "ianyeo.com"
+
+[[routes]]
+pattern = "www.ianyeo.com/blog/*"
+zone_name = "ianyeo.com"
+
+[site]
+bucket = "./"
 
 # Development settings
 [env.development]

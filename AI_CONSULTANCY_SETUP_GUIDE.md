@@ -74,14 +74,11 @@ This guide walks you through implementing a comprehensive AI consultancy landing
    wrangler secret put TURNSTILE_SECRET_KEY
    
    # New AI consultancy secrets
-   wrangler secret put ZOHO_CRM_CLIENT_ID     # Zoho CRM integration
-wrangler secret put ZOHO_CRM_CLIENT_SECRET # Zoho CRM integration  
-wrangler secret put ZOHO_CRM_REFRESH_TOKEN # Zoho CRM integration
-   wrangler secret put ZOHO_BOOKINGS_CLIENT_ID     # Zoho Bookings integration
-wrangler secret put ZOHO_BOOKINGS_CLIENT_SECRET # Zoho Bookings integration
-wrangler secret put ZOHO_BOOKINGS_REFRESH_TOKEN # Zoho Bookings integration
-wrangler secret put ZOHO_CAMPAIGNS_API_KEY      # Zoho Campaigns integration
-   wrangler secret put GA4_MEASUREMENT_ID   # Optional: For Google Analytics
+   wrangler secret put ZOHO_CRM_CLIENT_SECRET # Zoho CRM integration  
+   wrangler secret put ZOHO_CRM_REFRESH_TOKEN # Zoho CRM integration
+   wrangler secret put ZOHO_BOOKINGS_CLIENT_SECRET # Zoho Bookings integration
+   wrangler secret put ZOHO_BOOKINGS_REFRESH_TOKEN # Zoho Bookings integration
+   wrangler secret put ZOHO_CAMPAIGNS_REFRESH_TOKEN # Zoho Campaigns integration
    wrangler secret put GA4_API_SECRET       # Optional: For Google Analytics
    ```
 
@@ -89,9 +86,11 @@ wrangler secret put ZOHO_CAMPAIGNS_API_KEY      # Zoho Campaigns integration
    Edit `wrangler.toml` to add your actual IDs:
    ```toml
    [vars]
+   ZOHO_CRM_CLIENT_ID = "your-zoho-crm-client-id"
    ZOHO_CRM_API_URL = "https://www.zohoapis.com/crm/v6"
-ZOHO_BOOKINGS_API_URL = "https://www.zohoapis.com/bookings/v1"
-ZOHO_CAMPAIGNS_API_URL = "https://campaigns.zoho.com/api/v1.1"
+   ZOHO_BOOKINGS_CLIENT_ID = "your-zoho-bookings-client-id"
+   ZOHO_BOOKINGS_API_URL = "https://www.zohoapis.com/bookings/v1"
+   ZOHO_CAMPAIGNS_API_URL = "https://campaigns.zoho.com/api/v1.1"
    ```
 
 ### Phase 3: Deploy & Test (5 minutes)
@@ -174,6 +173,10 @@ ZOHO_CAMPAIGNS_API_URL = "https://campaigns.zoho.com/api/v1.1"
 | `/api/ab-test/{testName}` | GET | Get A/B test variant | Test name in URL |
 | `/api/email/subscribe` | POST | Newsletter subscription | Email, interests |
 | `/api/leads/score` | POST | Calculate lead score | Lead data |
+| `/api/bookings/services` | GET | Get available Zoho booking services | None |
+| `/api/bookings/availability` | GET | Get available time slots | ?service_id&date&timezone |
+| `/api/bookings/create` | POST | Create a Zoho booking | Booking details + customer info |
+| `/api/bookings/cancel` | POST | Cancel a Zoho booking | booking_id + reason |
 
 ### Lead Scoring Algorithm
 
@@ -271,6 +274,98 @@ Different sequences based on lead score:
 - **Assessment Completion**: 60-70% start-to-finish rate
 - **Lead Conversion**: 15-25% of visitors (industry benchmark: 5-15%)
 - **Lead Quality**: 70%+ qualified leads with proper scoring
+
+## 📅 Zoho Bookings Integration
+
+### Overview
+
+The system now includes full Zoho Bookings integration for automated meeting scheduling. This eliminates the manual step of sending calendar invites and provides a seamless booking experience.
+
+### Features
+
+- **Real-time Availability**: Fetches actual available slots from Zoho Bookings
+- **Automatic Scheduling**: Books meetings directly in Zoho Bookings calendar
+- **Email Automation**: Zoho handles confirmation emails and reminders
+- **Calendar Integration**: Automatic calendar invites sent to participants
+- **Fallback System**: Falls back to basic calendar booking if Zoho is unavailable
+
+### Setup Requirements
+
+1. **Zoho Bookings Account**: You need an active Zoho Bookings subscription
+2. **OAuth App Registration**: Register your app in Zoho Developer Console
+3. **Service Configuration**: Set up "AI Strategy Consultation" service in Zoho Bookings
+4. **API Credentials**: Get Client ID, Client Secret, and Refresh Token
+
+### API Endpoints
+
+| Endpoint | Purpose | Parameters |
+|----------|---------|------------|
+| `/api/bookings/services` | List available services | None |
+| `/api/bookings/availability` | Get time slots | service_id, date, timezone |
+| `/api/bookings/create` | Create booking | Full booking details |
+| `/api/bookings/cancel` | Cancel booking | booking_id, reason |
+
+### Booking Flow
+
+1. **Service Discovery**: System fetches available services on modal open
+2. **Time Selection**: Real availability fetched from Zoho Bookings API
+3. **Booking Creation**: Meeting created directly in Zoho Bookings
+4. **Confirmation**: Zoho sends automatic confirmation emails
+5. **CRM Sync**: Lead data synced to Zoho CRM with high score (95 points)
+
+### Configuration
+
+**Environment Variables (in wrangler.toml):**
+```toml
+ZOHO_BOOKINGS_CLIENT_ID = "your-zoho-bookings-client-id"
+ZOHO_BOOKINGS_API_URL = "https://www.zohoapis.com/bookings/v1"
+```
+
+**Secrets:**
+```bash
+wrangler secret put ZOHO_BOOKINGS_CLIENT_SECRET
+wrangler secret put ZOHO_BOOKINGS_REFRESH_TOKEN
+```
+
+### Error Handling
+
+- **Zoho Unavailable**: Falls back to basic calendar booking
+- **No Services**: Shows mock time slots for manual scheduling
+- **API Errors**: Graceful degradation with user-friendly messages
+- **Token Refresh**: Automatic token refresh for expired credentials
+
+### Benefits vs Previous System
+
+| Feature | Previous (Calendar) | New (Zoho Bookings) |
+|---------|-------------------|---------------------|
+| **Automation** | Manual invite sending | Fully automated |
+| **Availability** | Static mock slots | Real-time availability |
+| **Confirmation** | Basic email | Professional booking confirmation |
+| **Reminders** | Manual setup | Automatic reminders |
+| **Reschedule** | Email/manual process | Self-service via Zoho |
+| **Integration** | Standalone | Full Zoho ecosystem |
+
+### Monitoring & Debug
+
+Use these endpoints to test the integration:
+
+```bash
+# Test services endpoint
+curl https://ianyeo.com/api/bookings/services
+
+# Test availability (replace service_id)
+curl "https://ianyeo.com/api/bookings/availability?service_id=YOUR_SERVICE_ID&date=2024-01-15"
+
+# Check debug endpoints
+curl https://ianyeo.com/api/debug/test-all
+```
+
+### Expected Conversion Impact
+
+- **Booking Completion Rate**: 30-40% increase (less friction)
+- **Show-up Rate**: 20-25% increase (professional confirmations)
+- **Lead Quality**: Higher scores for actual meeting bookers
+- **Time Savings**: 2-3 hours/week on manual scheduling
 
 ## 🔄 Ongoing Maintenance
 
