@@ -131,10 +131,27 @@ For each list, create automated email sequences:
 2. AI basics for construction
 3. Free resources and next steps
 
-### 3.4 Get API Key
-1. Go to Setup → Developer Space → API
-2. Generate new API key
-3. Copy the **API Key**
+### 3.4 Get OAuth Refresh Token
+1. Go to [https://api-console.zoho.com](https://api-console.zoho.com)
+2. Click "Add Client" → "Self Client"
+3. Enter client name: "AI Consultancy Campaigns Integration"
+4. Copy the **Client ID** and **Client Secret**
+
+### 3.5 Generate Campaigns Refresh Token
+```bash
+# Step 1: Get authorization code (replace CLIENT_ID with your actual ID)
+https://accounts.zoho.com/oauth/v2/auth?scope=ZohoCampaigns.contact.ALL,ZohoCampaigns.campaign.ALL&client_id=YOUR_CLIENT_ID&response_type=code&access_type=offline&redirect_uri=https://ianyeo.com
+
+# Step 2: Exchange for refresh token
+curl -X POST https://accounts.zoho.com/oauth/v2/token \
+  -d "grant_type=authorization_code" \
+  -d "client_id=YOUR_CLIENT_ID" \
+  -d "client_secret=YOUR_CLIENT_SECRET" \
+  -d "redirect_uri=https://ianyeo.com" \
+  -d "code=AUTHORIZATION_CODE"
+```
+
+**Note:** You can use the same Client ID/Secret from CRM setup since Zoho allows one Self Client application per account.
 
 ## Step 4: Cloudflare Worker Secrets
 
@@ -146,13 +163,8 @@ wrangler secret put ZOHO_CRM_CLIENT_ID
 wrangler secret put ZOHO_CRM_CLIENT_SECRET  
 wrangler secret put ZOHO_CRM_REFRESH_TOKEN
 
-# Zoho Bookings
-wrangler secret put ZOHO_BOOKINGS_CLIENT_ID
-wrangler secret put ZOHO_BOOKINGS_CLIENT_SECRET
-wrangler secret put ZOHO_BOOKINGS_REFRESH_TOKEN
-
-# Zoho Campaigns
-wrangler secret put ZOHO_CAMPAIGNS_API_KEY
+# Zoho Campaigns (Optional - for email automation)
+wrangler secret put ZOHO_CAMPAIGNS_REFRESH_TOKEN
 
 # Optional: Google Analytics (if keeping)
 wrangler secret put GA4_MEASUREMENT_ID
@@ -209,10 +221,7 @@ TURNSTILE_SECRET_KEY           # Cloudflare Turnstile
 ZOHO_CRM_CLIENT_ID             # CRM OAuth
 ZOHO_CRM_CLIENT_SECRET         # CRM OAuth  
 ZOHO_CRM_REFRESH_TOKEN         # CRM OAuth
-ZOHO_BOOKINGS_CLIENT_ID        # Bookings OAuth
-ZOHO_BOOKINGS_CLIENT_SECRET    # Bookings OAuth
-ZOHO_BOOKINGS_REFRESH_TOKEN    # Bookings OAuth
-ZOHO_CAMPAIGNS_API_KEY         # Campaigns API
+ZOHO_CAMPAIGNS_REFRESH_TOKEN   # Campaigns OAuth (optional)
 ```
 
 ## Cost Comparison

@@ -1,0 +1,19 @@
+# Local Development with Production APIs
+# Copy this to .dev.vars and fill in your actual secret values
+# This allows local testing with real Zoho integrations
+
+# Email & Communication
+ZOHO_API_KEY=your-zeptomail-api-key
+
+# Security
+TURNSTILE_SECRET_KEY=your-turnstile-secret-key
+
+# CRM Integration
+ZOHO_CRM_CLIENT_SECRET=your-zoho-crm-client-secret
+ZOHO_CRM_REFRESH_TOKEN=your-zoho-crm-refresh-token
+
+# Marketing (Optional)
+ZOHO_CAMPAIGNS_REFRESH_TOKEN=your-zoho-campaigns-refresh-token
+
+# Analytics (Optional)
+GA4_API_SECRET=your-ga4-api-secret 

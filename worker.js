@@ -15,6 +15,19 @@ const corsHeaders = {
 const generateId = () => crypto.randomUUID();
 const getCurrentTimestamp = () => new Date().toISOString();
 
+// Helper function to normalize ZeptoMail API key format
+function getZeptoMailAuthHeader(apiKey) {
+  if (!apiKey) return '';
+  
+  // If the key already starts with "Zoho-enczapikey ", use it as-is
+  if (apiKey.startsWith('Zoho-enczapikey ')) {
+    return apiKey;
+  }
+  
+  // Otherwise, add the prefix
+  return `Zoho-enczapikey ${apiKey}`;
+}
+
 export default {
   async fetch(request, env, ctx) {
     // Handle CORS preflight
@@ -115,11 +128,48 @@ async function handleApiRequest(request, env, url) {
         }
         break;
 
-      case '/api/crm/sync':
-        if (request.method === 'POST') {
-          return await handleCRMSync(request, env);
-        }
-        break;
+          case '/api/crm/sync':
+      if (request.method === 'POST') {
+        return await handleCRMSync(request, env);
+      }
+      break;
+
+    // Debug endpoints for testing integrations
+    case '/api/debug/test-all':
+      if (request.method === 'GET') {
+        return await handleDebugTestAll(request, env);
+      }
+      break;
+
+    case '/api/debug/test-crm':
+      if (request.method === 'GET') {
+        return await handleDebugTestCRM(request, env);
+      }
+      break;
+
+    case '/api/debug/test-email':
+      if (request.method === 'GET') {
+        return await handleDebugTestEmail(request, env);
+      }
+      break;
+
+    case '/api/debug/test-secrets':
+      if (request.method === 'GET') {
+        return await handleDebugTestSecrets(request, env);
+      }
+      break;
+
+    case '/api/debug/test-zeptomail':
+      if (request.method === 'GET') {
+        return await handleDebugTestZeptoMail(request, env);
+      }
+      break;
+
+    case '/api/debug/test-raw-zeptomail':
+      if (request.method === 'GET') {
+        return await handleDebugRawZeptoMail(request, env);
+      }
+      break;
         
       default:
         // Check for dynamic routes
@@ -900,13 +950,12 @@ function getLeadTier(score) {
  */
 async function syncToCRM(leadData, env) {
   try {
-    // Mock CRM sync in local development
-    const isLocalDev = globalThis.navigator?.userAgent?.includes('Wrangler') || 
-                       globalThis.location?.hostname === 'localhost' ||
-                       !env.ZOHO_CRM_CLIENT_ID ||
-                       env.ZOHO_CRM_CLIENT_ID === '1000.Y29FWY9M8MKMB0Z2Y0VNGKLKUZ1G3U';
+    // Mock CRM sync only if using placeholder credentials
+    const isUsingMockCRM = !env.ZOHO_CRM_CLIENT_SECRET || 
+                          !env.ZOHO_CRM_REFRESH_TOKEN ||
+                          env.ZOHO_CRM_REFRESH_TOKEN === '1000.ff9f987ae5750104e63bfcc82a9eb12a.ac9b6959f4b6d466974ad2b213389eff';
     
-    if (isLocalDev) {
+    if (isUsingMockCRM) {
       console.log('🎯 === MOCK CRM SYNC (Local Development) ===');
       console.log('👤 Contact:', `${leadData.firstName} ${leadData.lastName}`);
       console.log('🏢 Company:', leadData.company);
@@ -1004,13 +1053,11 @@ function getWelcomeEmailSubject(leadScore) {
 
 async function addToZohoCampaigns(leadData, env) {
   try {
-    // Mock Campaigns sync in local development  
-    const isLocalDev = globalThis.navigator?.userAgent?.includes('Wrangler') || 
-                       globalThis.location?.hostname === 'localhost' ||
-                       !env.ZOHO_CAMPAIGNS_REFRESH_TOKEN ||
-                       env.ZOHO_CAMPAIGNS_REFRESH_TOKEN === 'your-zoho-campaigns-refresh-token';
+    // Mock Campaigns sync if no token set or using placeholder
+    const isUsingMockCampaigns = !env.ZOHO_CAMPAIGNS_REFRESH_TOKEN ||
+                                env.ZOHO_CAMPAIGNS_REFRESH_TOKEN === 'your-zoho-campaigns-refresh-token';
     
-    if (isLocalDev) {
+    if (isUsingMockCampaigns) {
       console.log('🎯 === MOCK CAMPAIGNS SYNC (Local Development) ===');
       console.log('📧 Email:', leadData.email);
       console.log('📝 Campaign List:', getZohoCampaignsList(leadData.leadScore));
@@ -1073,13 +1120,10 @@ function getZohoCampaignsList(leadScore) {
 
 async function sendTransactionalEmail(emailData, env) {
   try {
-    // Mock emails in local development (Wrangler dev environment)
-    const isLocalDev = globalThis.navigator?.userAgent?.includes('Wrangler') || 
-                       globalThis.location?.hostname === 'localhost' ||
-                       !env.ZOHO_API_KEY || 
-                       env.ZOHO_API_KEY === 'Zoho-enczapikey wSsVR61+8kWmCax/zmCsI...';
+    // Only mock emails if no API key is set
+    const isUsingMockKey = !env.ZOHO_API_KEY;
     
-    if (isLocalDev) {
+    if (isUsingMockKey) {
       console.log('🎯 === MOCK EMAIL (Local Development) ===');
       console.log('📧 To:', emailData.to);
       console.log('📝 Subject:', emailData.subject);
@@ -1088,39 +1132,58 @@ async function sendTransactionalEmail(emailData, env) {
       return true; // Success in local dev
     }
 
+    // Prepare the email payload - using exact ZeptoMail format
+    const emailPayload = {
+      from: {
+        address: env.ZOHO_FROM_EMAIL || 'ian@ianyeo.com'
+      },
+      to: [{ 
+        email_address: {
+          address: emailData.to,
+          name: emailData.templateData?.firstName || ''
+        }
+      }],
+      subject: emailData.subject,
+      htmlbody: createEmailTemplate(emailData.templateData),
+      textbody: createTextTemplate(emailData.templateData)
+    };
+
+    console.log('📧 Sending email via ZeptoMail to:', emailData.to);
+    console.log('📝 Subject:', emailData.subject);
+
     // Use existing ZeptoMail integration (already configured)
     const response = await fetch('https://api.zeptomail.com/v1.1/email', {
       method: 'POST',
       headers: {
-        'Authorization': `Zoho-enczapikey ${env.ZOHO_API_KEY}`,
+        'Authorization': getZeptoMailAuthHeader(env.ZOHO_API_KEY),
         'Content-Type': 'application/json',
         'Accept': 'application/json'
       },
-      body: JSON.stringify({
-        from: {
-          address: env.ZOHO_FROM_EMAIL,
-          name: 'Ian Yeo - AI Consulting'
-        },
-        to: [{ 
-          email_address: {
-            address: emailData.to,
-            name: emailData.templateData?.firstName || ''
-          }
-        }],
-        subject: emailData.subject,
-        htmlbody: createEmailTemplate(emailData.templateData),
-        textbody: createTextTemplate(emailData.templateData)
-      })
+      body: JSON.stringify(emailPayload)
     });
 
+    const responseText = await response.text();
+
     if (!response.ok) {
-      console.error('ZeptoMail error:', response.status, await response.text());
+      console.error('❌ ZeptoMail API Error:');
+      console.error('Status:', response.status, response.statusText);
+      console.error('Response Headers:', Object.fromEntries(response.headers));
+      console.error('Response Body:', responseText);
+      console.error('Request Payload:', JSON.stringify(emailPayload, null, 2));
+      console.error('API Key Length:', env.ZOHO_API_KEY ? env.ZOHO_API_KEY.length : 'MISSING');
+      console.error('Sender Email:', env.ZOHO_FROM_EMAIL);
+      
+      // Log the error but don't throw - let the calling function handle it
+      console.error(`ZeptoMail error: ${response.status}`);
       return false;
     }
 
+    console.log('✅ Email sent successfully via ZeptoMail');
+    console.log('📊 Response:', responseText);
     return true;
   } catch (error) {
-    console.error('Email send error:', error);
+    console.error('❌ Email send exception:', error.message);
+    console.error('Stack:', error.stack);
     return false;
   }
 }
@@ -1386,7 +1449,7 @@ async function sendReportEmail(env, formData, downloadUrl, expiresAt) {
     const response = await fetch('https://api.zeptomail.com/v1.1/email', {
       method: 'POST',
       headers: {
-        'Authorization': `Zoho-enczapikey ${env.ZOHO_API_KEY}`,
+        'Authorization': getZeptoMailAuthHeader(env.ZOHO_API_KEY),
         'Content-Type': 'application/json',
         'Accept': 'application/json'
       },
@@ -1645,6 +1708,481 @@ function jsonResponse(data, status = 200) {
   });
 }
 
+// ===============================
+// DEBUG ENDPOINTS
+// ===============================
+
+async function handleDebugTestSecrets(request, env) {
+  const results = {
+    timestamp: new Date().toISOString(),
+    environment: 'production',
+    secrets: {}
+  };
+
+  // Test each secret (don't expose actual values)
+  const secretsToTest = [
+    'ZOHO_API_KEY',
+    'TURNSTILE_SECRET_KEY', 
+    'ZOHO_CRM_CLIENT_SECRET',
+    'ZOHO_CRM_REFRESH_TOKEN',
+    'ZOHO_CAMPAIGNS_REFRESH_TOKEN',
+    'GA4_API_SECRET'
+  ];
+
+  secretsToTest.forEach(secretName => {
+    const value = env[secretName];
+    results.secrets[secretName] = {
+      exists: !!value,
+      length: value ? value.length : 0,
+      preview: value ? `${value.substring(0, 10)}...` : 'NOT_SET'
+    };
+  });
+
+  // Test environment variables
+  results.envVars = {
+    ZOHO_CRM_CLIENT_ID: env.ZOHO_CRM_CLIENT_ID || 'NOT_SET',
+    ZOHO_CRM_API_URL: env.ZOHO_CRM_API_URL || 'NOT_SET',
+    ZOHO_FROM_EMAIL: env.ZOHO_FROM_EMAIL || 'NOT_SET',
+    SITE_URL: env.SITE_URL || 'NOT_SET'
+  };
+
+  return jsonResponse(results);
+}
+
+async function handleDebugTestEmail(request, env) {
+  const results = {
+    timestamp: new Date().toISOString(),
+    test: 'email_integration',
+    steps: []
+  };
+
+  try {
+    // Step 1: Check ZeptoMail API key
+    results.steps.push({
+      step: 1,
+      name: 'Check ZeptoMail API Key',
+      status: env.ZOHO_API_KEY ? 'PASS' : 'FAIL',
+      details: env.ZOHO_API_KEY ? 'API key is set' : 'ZOHO_API_KEY not found'
+    });
+
+    if (!env.ZOHO_API_KEY) {
+      return jsonResponse(results);
+    }
+
+    // Step 2: Test email sending
+    const testEmailData = {
+      to: 'ian@ianyeo.com',
+      subject: 'Test Email from AI Consultancy Debug',
+      templateData: {
+        htmlContent: '<h1>Debug Test Email</h1><p>This is a test email to verify ZeptoMail integration.</p><p>Timestamp: ' + new Date().toISOString() + '</p>'
+      }
+    };
+
+    console.log('🧪 Sending test email via ZeptoMail...');
+    const emailResult = await sendTransactionalEmail(testEmailData, env);
+    
+    results.steps.push({
+      step: 2,
+      name: 'Send Test Email',
+      status: emailResult ? 'PASS' : 'FAIL',
+      details: emailResult ? 'Test email sent successfully' : 'Failed to send test email'
+    });
+
+  } catch (error) {
+    results.steps.push({
+      step: 'ERROR',
+      name: 'Email Test Error',
+      status: 'FAIL',
+      details: error.message
+    });
+  }
+
+  return jsonResponse(results);
+}
+
+async function handleDebugTestCRM(request, env) {
+  const results = {
+    timestamp: new Date().toISOString(),
+    test: 'crm_integration',
+    steps: []
+  };
+
+  try {
+    // Step 1: Check CRM credentials
+    const hasClientId = !!env.ZOHO_CRM_CLIENT_ID;
+    const hasClientSecret = !!env.ZOHO_CRM_CLIENT_SECRET;
+    const hasRefreshToken = !!env.ZOHO_CRM_REFRESH_TOKEN;
+
+    results.steps.push({
+      step: 1,
+      name: 'Check CRM Credentials',
+      status: hasClientId && hasClientSecret && hasRefreshToken ? 'PASS' : 'FAIL',
+      details: {
+        client_id: hasClientId ? 'SET' : 'MISSING',
+        client_secret: hasClientSecret ? 'SET' : 'MISSING', 
+        refresh_token: hasRefreshToken ? 'SET' : 'MISSING'
+      }
+    });
+
+    if (!hasClientId || !hasClientSecret || !hasRefreshToken) {
+      return jsonResponse(results);
+    }
+
+    // Step 2: Test access token generation
+    console.log('🧪 Testing Zoho CRM access token...');
+    const accessToken = await getZohoAccessToken('crm', env);
+    
+    results.steps.push({
+      step: 2,
+      name: 'Generate Access Token',
+      status: accessToken ? 'PASS' : 'FAIL',
+      details: accessToken ? 'Access token generated successfully' : 'Failed to generate access token'
+    });
+
+    if (!accessToken) {
+      return jsonResponse(results);
+    }
+
+    // Step 3: Test CRM API connection
+    console.log('🧪 Testing Zoho CRM API connection...');
+    const testResponse = await fetch(`${env.ZOHO_CRM_API_URL}/settings/modules`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Zoho-oauthtoken ${accessToken}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    results.steps.push({
+      step: 3,
+      name: 'Test CRM API Connection',
+      status: testResponse.ok ? 'PASS' : 'FAIL',
+      details: testResponse.ok ? 'CRM API accessible' : `API error: ${testResponse.status}`
+    });
+
+    // Step 4: Test contact creation
+    if (testResponse.ok) {
+      console.log('🧪 Testing contact creation...');
+      const testLead = {
+        email: 'debug-test@example.com',
+        firstName: 'Debug',
+        lastName: 'Test',
+        company: 'Test Company',
+        jobTitle: 'Debug Tester',
+        leadScore: 90,
+        status: 'debug-test',
+        source: 'debug-endpoint',
+        campaign: 'Debug Test'
+      };
+
+      const crmResult = await syncToCRM(testLead, env);
+      
+      results.steps.push({
+        step: 4,
+        name: 'Test Contact Creation',
+        status: crmResult ? 'PASS' : 'FAIL',
+        details: crmResult ? 'Test contact created successfully' : 'Failed to create test contact'
+      });
+    }
+
+  } catch (error) {
+    results.steps.push({
+      step: 'ERROR',
+      name: 'CRM Test Error',
+      status: 'FAIL',
+      details: error.message
+    });
+  }
+
+  return jsonResponse(results);
+}
+
+async function handleDebugTestAll(request, env) {
+  const results = {
+    timestamp: new Date().toISOString(),
+    test: 'full_integration_test',
+    summary: {},
+    details: {}
+  };
+
+  try {
+    // Test secrets
+    console.log('🧪 Testing secrets...');
+    const secretsResponse = await handleDebugTestSecrets(request, env);
+    const secretsData = await secretsResponse.json();
+    results.details.secrets = secretsData;
+    results.summary.secrets = Object.values(secretsData.secrets).every(s => s.exists) ? 'PASS' : 'FAIL';
+
+    // Test email
+    console.log('🧪 Testing email integration...');
+    const emailResponse = await handleDebugTestEmail(request, env);
+    const emailData = await emailResponse.json();
+    results.details.email = emailData;
+    results.summary.email = emailData.steps.every(s => s.status === 'PASS') ? 'PASS' : 'FAIL';
+
+    // Test CRM
+    console.log('🧪 Testing CRM integration...');
+    const crmResponse = await handleDebugTestCRM(request, env);
+    const crmData = await crmResponse.json();
+    results.details.crm = crmData;
+    results.summary.crm = crmData.steps.every(s => s.status === 'PASS') ? 'PASS' : 'FAIL';
+
+    // Overall status
+    results.overall_status = Object.values(results.summary).every(status => status === 'PASS') ? 'ALL_PASS' : 'ISSUES_FOUND';
+
+  } catch (error) {
+    results.error = error.message;
+    results.overall_status = 'ERROR';
+  }
+
+  return jsonResponse(results);
+}
+
+async function handleDebugTestZeptoMail(request, env) {
+  const results = {
+    timestamp: new Date().toISOString(),
+    test: 'zeptomail_detailed_test',
+    steps: []
+  };
+
+  try {
+    // Step 1: Check configuration
+    results.steps.push({
+      step: 1,
+      name: 'Check ZeptoMail Configuration',
+      status: 'INFO',
+      details: {
+        api_key_length: env.ZOHO_API_KEY ? env.ZOHO_API_KEY.length : 0,
+        api_key_prefix: env.ZOHO_API_KEY ? env.ZOHO_API_KEY.substring(0, 20) + '...' : 'MISSING',
+        sender_email: env.ZOHO_FROM_EMAIL || 'MISSING',
+        site_url: env.SITE_URL || 'MISSING'
+      }
+    });
+
+    if (!env.ZOHO_API_KEY) {
+      results.steps.push({
+        step: 2,
+        name: 'ZeptoMail API Key Missing',
+        status: 'FAIL',
+        details: 'ZOHO_API_KEY environment variable not set'
+      });
+      return jsonResponse(results);
+    }
+
+    // Step 2: Test with minimal email
+    console.log('🧪 Testing ZeptoMail with minimal email...');
+    
+    const testPayload = {
+      from: {
+        address: env.ZOHO_FROM_EMAIL || 'ian@ianyeo.com'
+      },
+      to: [{ 
+        email_address: {
+          address: 'ian@ianyeo.com',
+          name: 'Ian Yeo'
+        }
+      }],
+      subject: 'ZeptoMail Debug Test - ' + new Date().toISOString(),
+      htmlbody: '<h1>ZeptoMail Debug Test</h1><p>This is a test email to debug ZeptoMail integration.</p>',
+      textbody: 'ZeptoMail Debug Test - This is a test email to debug ZeptoMail integration.'
+    };
+
+    console.log('📧 Test payload:', JSON.stringify(testPayload, null, 2));
+
+    const response = await fetch('https://api.zeptomail.com/v1.1/email', {
+      method: 'POST',
+      headers: {
+        'Authorization': getZeptoMailAuthHeader(env.ZOHO_API_KEY),
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify(testPayload)
+    });
+
+    const responseText = await response.text();
+    
+    results.steps.push({
+      step: 2,
+      name: 'ZeptoMail API Test',
+      status: response.ok ? 'PASS' : 'FAIL',
+      details: {
+        status_code: response.status,
+        status_text: response.statusText,
+        response: responseText,
+        headers: Object.fromEntries(response.headers)
+      }
+    });
+
+    if (!response.ok) {
+      results.steps.push({
+        step: 3,
+        name: 'Error Analysis',
+        status: 'INFO',
+        details: {
+          likely_causes: [
+            'Sender email (ian@ianyeo.com) not verified in ZeptoMail',
+            'Domain (ianyeo.com) not authenticated',
+            'API key is for wrong service (e.g., Campaigns instead of ZeptoMail)',
+            'API key permissions insufficient'
+          ],
+          next_steps: [
+            '1. Login to ZeptoMail console: https://www.zoho.com/zeptomail/',
+            '2. Verify sender email address',
+            '3. Check domain authentication',
+            '4. Verify API key is for ZeptoMail (not Campaigns)'
+          ]
+        }
+      });
+    }
+
+  } catch (error) {
+    results.steps.push({
+      step: 'ERROR',
+      name: 'ZeptoMail Test Error',
+      status: 'FAIL',
+      details: error.message
+    });
+  }
+
+  return jsonResponse(results);
+}
+
+async function handleDebugRawZeptoMail(request, env) {
+  const results = {
+    timestamp: new Date().toISOString(),
+    test: 'raw_zeptomail_test',
+    steps: []
+  };
+
+  try {
+    // Step 1: Check API key
+    results.steps.push({
+      step: 1,
+      name: 'API Key Check',
+      status: 'INFO',
+      details: {
+        api_key_exists: !!env.ZOHO_API_KEY,
+        api_key_length: env.ZOHO_API_KEY ? env.ZOHO_API_KEY.length : 0,
+        api_key_preview: env.ZOHO_API_KEY ? env.ZOHO_API_KEY.substring(0, 30) + '...' : 'MISSING'
+      }
+    });
+
+    if (!env.ZOHO_API_KEY) {
+      results.steps.push({
+        step: 2,
+        name: 'API Key Missing',
+        status: 'FAIL',
+        details: 'ZOHO_API_KEY environment variable not set'
+      });
+      return jsonResponse(results);
+    }
+
+    // Step 2: Test with ian@ianyeo.com (current sender)
+    const testPayload1 = {
+      from: { address: "ian@ianyeo.com" },
+      to: [{ email_address: { address: "ian@ianyeo.com", name: "Ian Yeo" } }],
+      subject: "Raw Test - ian@ianyeo.com - " + new Date().toISOString(),
+      htmlbody: "<div><b>Raw test email from ian@ianyeo.com</b></div>"
+    };
+
+    console.log('🧪 Testing ian@ianyeo.com...');
+    const response1 = await fetch('https://api.zeptomail.com/v1.1/email', {
+      method: 'POST',
+      headers: {
+        'Authorization': getZeptoMailAuthHeader(env.ZOHO_API_KEY),
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify(testPayload1)
+    });
+
+    const responseText1 = await response1.text();
+    
+    results.steps.push({
+      step: 2,
+      name: 'Test ian@ianyeo.com',
+      status: response1.ok ? 'PASS' : 'FAIL',
+      details: {
+        status_code: response1.status,
+        status_text: response1.statusText,
+        response: responseText1.substring(0, 500) + (responseText1.length > 500 ? '...' : ''),
+        headers: Object.fromEntries(response1.headers)
+      }
+    });
+
+    // Step 3: Test with noreply@ianyeo.com (from your curl example)
+    const testPayload2 = {
+      from: { address: "noreply@ianyeo.com" },
+      to: [{ email_address: { address: "ian@ianyeo.com", name: "Ian Yeo" } }],
+      subject: "Raw Test - noreply@ianyeo.com - " + new Date().toISOString(),
+      htmlbody: "<div><b>Raw test email from noreply@ianyeo.com</b></div>"
+    };
+
+    console.log('🧪 Testing noreply@ianyeo.com...');
+    const response2 = await fetch('https://api.zeptomail.com/v1.1/email', {
+      method: 'POST',
+      headers: {
+        'Authorization': getZeptoMailAuthHeader(env.ZOHO_API_KEY),
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify(testPayload2)
+    });
+
+    const responseText2 = await response2.text();
+    
+    results.steps.push({
+      step: 3,
+      name: 'Test noreply@ianyeo.com',
+      status: response2.ok ? 'PASS' : 'FAIL',
+      details: {
+        status_code: response2.status,
+        status_text: response2.statusText,
+        response: responseText2.substring(0, 500) + (responseText2.length > 500 ? '...' : ''),
+        headers: Object.fromEntries(response2.headers)
+      }
+    });
+
+    // Step 4: Analysis and recommendations
+    const working_sender = response1.ok ? 'ian@ianyeo.com' : response2.ok ? 'noreply@ianyeo.com' : 'neither';
+    
+    results.steps.push({
+      step: 4,
+      name: 'Analysis',
+      status: 'INFO',
+      details: {
+        working_sender: working_sender,
+        recommendation: working_sender === 'neither' ? 
+          'Check ZeptoMail console for sender verification' :
+          `Update ZOHO_FROM_EMAIL to use ${working_sender}`,
+        next_steps: working_sender === 'neither' ? [
+          '1. Login to ZeptoMail: https://www.zoho.com/zeptomail/',
+          '2. Check verified sender addresses',
+          '3. Verify domain authentication',
+          '4. Check API key permissions'
+        ] : [
+          `Set ZOHO_FROM_EMAIL environment variable to ${working_sender}`,
+          'Redeploy the worker',
+          'Test email integration'
+        ]
+      }
+    });
+
+  } catch (error) {
+    results.steps.push({
+      step: 'ERROR',
+      name: 'Test Error',
+      status: 'FAIL',
+      details: {
+        error: error.message,
+        stack: error.stack
+      }
+    });
+  }
+
+  return jsonResponse(results);
+}
+
 function getConsultancyLandingPageHTML(env) {
   return `<!DOCTYPE html>
 <html lang="en">
@@ -1656,41 +2194,338 @@ function getConsultancyLandingPageHTML(env) {
     <meta name="keywords" content="AI construction, construction technology, PropTech, digital transformation, Ian Yeo, construction AI consultant">
     
     <link rel="canonical" href="https://ianyeo.com/ai-construction-consulting">
-    <link rel="stylesheet" href="/style.css">
-    <link rel="stylesheet" href="/ai-consultancy.css">
     
     <script>
         window.TURNSTILE_SITE_KEY = '${env.TURNSTILE_SITE_KEY}';
     </script>
     
     <style>
-        /* Inline basic styles for local development */
-        body { font-family: Arial, sans-serif; margin: 0; padding: 0; line-height: 1.6; }
-        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
-        .hero { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 100px 0; text-align: center; }
-        .hero-title { font-size: 3rem; margin-bottom: 1rem; font-weight: bold; }
-        .hero-subtitle { font-size: 1.2rem; margin-bottom: 2rem; opacity: 0.9; }
-        .btn-primary { background: #3498db; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; display: inline-block; margin: 10px; font-weight: bold; }
-        .btn-secondary { background: transparent; color: white; border: 2px solid white; padding: 13px 28px; text-decoration: none; border-radius: 5px; display: inline-block; margin: 10px; }
-        .section { padding: 80px 0; }
-        .section-title { font-size: 2.5rem; text-align: center; margin-bottom: 3rem; color: #2c3e50; }
-        .assessment { background: #f8f9fa; }
-        .form-group { margin-bottom: 20px; }
-        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
-        .form-group input, .form-group select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 5px; font-size: 16px; }
-        .assessment-form { max-width: 600px; margin: 0 auto; background: white; padding: 40px; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
-        .question { margin-bottom: 30px; }
-        .question h4 { margin-bottom: 15px; color: #2c3e50; }
-        .options { display: grid; gap: 10px; }
-        .option { padding: 15px; border: 2px solid #e0e0e0; border-radius: 8px; cursor: pointer; transition: all 0.3s; }
-        .option:hover { border-color: #3498db; background: #f0f8ff; }
-        .option input[type="radio"] { margin-right: 10px; }
-        .turnstile-container { margin: 20px 0; text-align: center; }
-        #assessment-results { display: none; margin-top: 30px; }
-        .results-card { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center; }
-        .score-circle { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; width: 120px; height: 120px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0 auto 20px; }
-        .score-number { font-size: 2rem; font-weight: bold; }
-        .score-label { font-size: 0.9rem; }
+        /* Complete CSS for AI Consultancy Page - All Inline */
+        
+        /* CSS Variables */
+        :root {
+          --bg-primary: #ffffff;
+          --bg-secondary: #f8fafc;
+          --bg-tertiary: #f1f5f9;
+          --text-primary: #0f172a;
+          --text-secondary: #475569;
+          --text-tertiary: #64748b;
+          --border-subtle: rgba(15, 23, 42, 0.08);
+          --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          --radius-sm: 0.5rem;
+          --radius-md: 0.75rem;
+          --radius-lg: 1rem;
+          --spacing-sm: 0.5rem;
+          --spacing-md: 1rem;
+          --spacing-lg: 1.5rem;
+          --spacing-xl: 2rem;
+          --transition-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Reset & Base */
+        *, *::before, *::after {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+        }
+
+        html {
+          scroll-behavior: smooth;
+        }
+
+        body {
+          font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+          background: var(--bg-primary);
+          color: var(--text-primary);
+          line-height: 1.7;
+          font-weight: 400;
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
+          overflow-x: hidden;
+        }
+
+        /* Layout */
+        .container { 
+          max-width: 1200px; 
+          margin: 0 auto; 
+          padding: 0 20px; 
+        }
+
+        /* Hero Section */
+        .hero { 
+          background: var(--gradient-primary);
+          color: white; 
+          padding: 100px 0; 
+          text-align: center;
+          position: relative;
+        }
+
+        .hero-title { 
+          font-size: 3rem; 
+          margin-bottom: 1rem; 
+          font-weight: 700;
+          line-height: 1.1;
+        }
+
+        .hero-subtitle { 
+          font-size: 1.2rem; 
+          margin-bottom: 2rem; 
+          opacity: 0.9;
+          max-width: 600px;
+          margin-left: auto;
+          margin-right: auto;
+        }
+
+                 .hero-cta {
+           display: flex;
+           gap: 1rem;
+           justify-content: center;
+           flex-wrap: wrap;
+           margin-top: 2rem;
+         }
+
+        /* Buttons */
+        .btn-primary, .btn-secondary {
+          padding: 15px 30px;
+          border-radius: var(--radius-md);
+          font-weight: 600;
+          text-decoration: none;
+          display: inline-block;
+          transition: all var(--transition-normal);
+          border: none;
+          cursor: pointer;
+          font-size: 1rem;
+        }
+
+        .btn-primary { 
+          background: #3498db; 
+          color: white;
+        }
+
+        .btn-primary:hover {
+          background: #2980b9;
+          transform: translateY(-2px);
+        }
+
+        .btn-secondary { 
+          background: transparent; 
+          color: white; 
+          border: 2px solid white;
+        }
+
+                 .btn-secondary:hover {
+           background: white;
+           color: #667eea;
+         }
+
+         /* Hero Section Button Overrides */
+         .hero .btn-primary, .hero .btn-secondary {
+           padding: 18px 36px;
+           font-size: 1.1rem;
+           font-weight: 700;
+           border-radius: 12px;
+           min-width: 240px;
+           box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+           border: 2px solid transparent;
+           text-transform: none;
+           letter-spacing: 0.025em;
+           margin: 8px;
+         }
+
+         .hero .btn-primary {
+           background: #3498db;
+           border-color: #3498db;
+           color: white;
+         }
+
+         .hero .btn-primary:hover {
+           background: #2980b9;
+           border-color: #2980b9;
+           transform: translateY(-3px);
+           box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4);
+         }
+
+         .hero .btn-secondary {
+           background: #3498db;
+           border-color: #3498db;
+           color: white;
+         }
+
+         .hero .btn-secondary:hover {
+           background: #2980b9;
+           border-color: #2980b9;
+           transform: translateY(-3px);
+           box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4);
+         }
+
+        /* Sections */
+        .section { 
+          padding: 80px 0; 
+        }
+
+        .section-title { 
+          font-size: 2.5rem; 
+          text-align: center; 
+          margin-bottom: 3rem; 
+          color: var(--text-primary);
+          font-weight: 700;
+        }
+
+        .assessment { 
+          background: var(--bg-secondary); 
+        }
+
+        /* Forms */
+        .form-group { 
+          margin-bottom: 20px; 
+        }
+
+        .form-group label { 
+          display: block; 
+          margin-bottom: 8px; 
+          font-weight: 600;
+          color: var(--text-primary);
+        }
+
+        .form-group input, 
+        .form-group select, 
+        .form-group textarea { 
+          width: 100%; 
+          padding: 12px 15px; 
+          border: 2px solid #e1e8ed; 
+          border-radius: var(--radius-md); 
+          font-size: 16px;
+          transition: border-color var(--transition-normal);
+          box-sizing: border-box;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+          outline: none;
+          border-color: #667eea;
+          box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .assessment-form { 
+          max-width: 600px; 
+          margin: 0 auto; 
+          background: white; 
+          padding: 40px; 
+          border-radius: var(--radius-lg); 
+          box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
+        }
+
+        /* Questions */
+        .question { 
+          margin-bottom: 30px; 
+        }
+
+        .question h4 { 
+          margin-bottom: 15px; 
+          color: var(--text-primary);
+          font-weight: 600;
+        }
+
+        .options { 
+          display: grid; 
+          gap: 10px; 
+        }
+
+        .option { 
+          padding: 15px; 
+          border: 2px solid #e0e0e0; 
+          border-radius: var(--radius-md); 
+          cursor: pointer; 
+          transition: all var(--transition-normal);
+          display: flex;
+          align-items: center;
+        }
+
+        .option:hover { 
+          border-color: #667eea; 
+          background: #f0f8ff; 
+        }
+
+        .option input[type="radio"] { 
+          margin-right: 10px; 
+        }
+
+        /* Results */
+        .turnstile-container { 
+          margin: 20px 0; 
+          text-align: center; 
+        }
+
+        #assessment-results { 
+          display: none; 
+          margin-top: 30px; 
+        }
+
+        .results-card { 
+          background: white; 
+          padding: 30px; 
+          border-radius: var(--radius-lg); 
+          box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
+          text-align: center; 
+        }
+
+        .score-circle { 
+          background: var(--gradient-primary); 
+          color: white; 
+          width: 120px; 
+          height: 120px; 
+          border-radius: 50%; 
+          display: flex; 
+          flex-direction: column; 
+          align-items: center; 
+          justify-content: center; 
+          margin: 0 auto 20px; 
+        }
+
+        .score-number { 
+          font-size: 2rem; 
+          font-weight: bold; 
+        }
+
+        .score-label { 
+          font-size: 0.9rem; 
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+          .hero-title {
+            font-size: 2rem;
+          }
+          
+          .hero-subtitle {
+            font-size: 1rem;
+          }
+          
+          .section-title {
+            font-size: 2rem;
+          }
+          
+          .assessment-form {
+            padding: 30px 20px;
+          }
+          
+          .hero-cta {
+            flex-direction: column;
+            align-items: center;
+          }
+          
+                     .btn-primary, .btn-secondary {
+             padding: 12px 24px;
+             font-size: 0.9rem;
+           }
+           
+           .hero .btn-primary, .hero .btn-secondary {
+             padding: 16px 28px;
+             font-size: 1rem;
+             min-width: 200px;
+           }
+        }
     </style>
 </head>
 <body>
