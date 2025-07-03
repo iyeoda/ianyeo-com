@@ -37,9 +37,9 @@ The broader impact is quantified: **each additional technology adopted correlate
 
 ### Implementation barriers reveal consultation opportunities
 
-Despite compelling ROI potential, significant barriers persist. **Technical challenges** include data integration across a median of **11 different data environments** per construction business and infrastructure limitations at remote construction sites. **Financial barriers** center on high initial costs and uncertain ROI timeframes, particularly challenging for small and medium-sized firms.
+Despite compelling ROI potential, significant barriers persist. **Technical challenges** include data integration across a median of **11 different data environments** per construction business and infrastructure limitations at remote construction sites. **Financial barriers** center on high initial costs and uncertain ROI timeframes, particularly challenging for small and medium-sised firms.
 
-**Cultural resistance** remains substantial in this traditionally risk-averse industry. **69% of organizations report shortage of qualified AI professionals**, while **45% lack clear AI strategy**. These challenges create prime opportunities for specialized AI consultancy services that can bridge technical expertise with industry-specific implementation knowledge.
+**Cultural resistance** remains substantial in this traditionally risk-averse industry. **69% of organisations report shortage of qualified AI professionals**, while **45% lack clear AI strategy**. These challenges create prime opportunities for specialised AI consultancy services that can bridge technical expertise with industry-specific implementation knowledge.
 
 ## PropTech Market Outlook and Trends (2025)
 
@@ -71,25 +71,25 @@ The **IPO market revival** shows renewed confidence, with **80 IPOs priced in Q1
 
 ### Success rates remain concerningly low despite massive investment
 
-Despite **$2.5 trillion global spending on digital transformation in 2024** (projected to reach **$3.9 trillion by 2027**), success rates remain stubbornly low. Only **30-35% of digital transformation initiatives achieve their objectives**, with organizations capturing merely **31% of expected revenue lift and 25% of expected cost savings**.
+Despite **$2.5 trillion global spending on digital transformation in 2024** (projected to reach **$3.9 trillion by 2027**), success rates remain stubbornly low. Only **30-35% of digital transformation initiatives achieve their objectives**, with organisations capturing merely **31% of expected revenue lift and 25% of expected cost savings**.
 
-This performance gap creates significant opportunity for specialized consultancy services that can improve implementation success rates. The scale of investment—**$344.72 billion digital transformation consulting market in 2024**, projected to reach **$896.21 billion by 2033**—indicates strong demand for expertise that can bridge the execution gap.
+This performance gap creates significant opportunity for specialised consultancy services that can improve implementation success rates. The scale of investment—**$344.72 billion digital transformation consulting market in 2024**, projected to reach **$896.21 billion by 2033**—indicates strong demand for expertise that can bridge the execution gap.
 
 ### Leadership capabilities drive transformation success
 
-**Organizations with engaged Chief Digital Officers are 6x more likely to succeed** in digital transformation initiatives. The research reveals that **75% of successful transformations have CEO/executive committee leadership throughout the lifecycle**, emphasizing the critical importance of senior leadership engagement.
+**Organisations with engaged Chief Digital Officers are 6x more likely to succeed** in digital transformation initiatives. The research reveals that **75% of successful transformations have CEO/executive committee leadership throughout the lifecycle**, emphasizing the critical importance of senior leadership engagement.
 
 **Business-led initiatives** now represent **75% of transformations**, compared to historically IT-driven approaches. This shift reflects growing recognition that digital transformation is fundamentally about business model evolution rather than technology deployment alone.
 
 ### Construction industry faces unique digital challenges
 
-The construction sector shows specific digital transformation patterns. **61% of commercial real estate firms still rely on legacy systems**, while **nearly 50% are attempting to modernize infrastructure**. Only **14% of real estate companies have adopted AI**, though **28% are starting implementation**.
+The construction sector shows specific digital transformation patterns. **61% of commercial real estate firms still rely on legacy systems**, while **nearly 50% are attempting to modernise infrastructure**. Only **14% of real estate companies have adopted AI**, though **28% are starting implementation**.
 
-These statistics reveal both challenge and opportunity. Construction companies require specialized guidance to navigate legacy system integration, workforce training, and cultural change management. The industry's **$110-180 billion productivity improvement potential** through AI adoption (McKinsey analysis) provides compelling ROI justification for transformation initiatives.
+These statistics reveal both challenge and opportunity. Construction companies require specialised guidance to navigate legacy system integration, workforce training, and cultural change management. The industry's **$110-180 billion productivity improvement potential** through AI adoption (McKinsey analysis) provides compelling ROI justification for transformation initiatives.
 
 ### Change management strategies must address cultural resistance
 
-**47% of executives believe less than half of employees have embraced digital transformation**, indicating widespread cultural resistance. Successful organizations implement comprehensive change management strategies including continuous communication evolution, multi-channel engagement approaches, and purpose-driven messaging connecting transformation to organizational mission.
+**47% of executives believe less than half of employees have embraced digital transformation**, indicating widespread cultural resistance. Successful organisations implement comprehensive change management strategies including continuous communication evolution, multi-channel engagement approaches, and purpose-driven messaging connecting transformation to organisational mission.
 
 The **"crawl, walk, run" three-phase implementation approach** shows significantly higher success rates. This methodology involves pilot programs with limited scope, scaled implementation with lessons learned integration, and full deployment with continuous optimization.
 
@@ -123,7 +123,7 @@ The **"digital golden thread" requirement** mandates digital submissions at thre
 
 Despite challenges, **technology adoption is accelerating**. The average construction business now uses **6.2 different technologies, up 20% from 5.3 technologies in 2023**. **AI and machine learning adoption reached 37%**, up from 26% in 2023, while **70% of construction firms plan to increase BIM usage by 2025**.
 
-**Each additional technology adoption leads to 1.4% higher annual revenue growth**, providing quantified justification for continued digital investment. However, **76% of construction businesses report technical skill shortages**, indicating ongoing need for specialized consultation and training services.
+**Each additional technology adoption leads to 1.4% higher annual revenue growth**, providing quantified justification for continued digital investment. However, **76% of construction businesses report technical skill shortages**, indicating ongoing need for specialised consultation and training services.
 
 ## Strategic Implications for AI Consultancy
 
@@ -137,12 +137,12 @@ Building Safety Act requirements create non-discretionary demand for digital imp
 
 ### Financial returns justify premium consulting services
 
-Demonstrated ROI data—**12% reduction in project overruns**, **10% cost reduction**, **$1.14 million revenue uplift per $100 million revenue**—provides compelling business case for AI implementation. These metrics support premium pricing for specialized consultation services that deliver measurable results.
+Demonstrated ROI data—**12% reduction in project overruns**, **10% cost reduction**, **$1.14 million revenue uplift per $100 million revenue**—provides compelling business case for AI implementation. These metrics support premium pricing for specialised consultation services that deliver measurable results.
 
 ### Cultural change expertise becomes critical differentiator
 
 With **47% of executives reporting employee resistance** and **75% of transformations requiring CEO leadership**, success depends on change management expertise as much as technical capability. Consultancy services that combine AI technical knowledge with construction industry cultural understanding create sustainable competitive advantage.
 
-The construction industry's **"tried and tested" mentality** and **older workforce demographics** require specialized change management approaches. Consultants who understand construction industry culture and can effectively navigate resistance to change will achieve superior implementation success rates.
+The construction industry's **"tried and tested" mentality** and **older workforce demographics** require specialised change management approaches. Consultants who understand construction industry culture and can effectively navigate resistance to change will achieve superior implementation success rates.
 
-This comprehensive research provides the foundation for positioning Ian Yeo's AI consultancy as the specialized expertise construction companies need to successfully navigate digital transformation while capturing significant productivity and competitive advantages.
+This comprehensive research provides the foundation for positioning Ian Yeo's AI consultancy as the specialised expertise construction companies need to successfully navigate digital transformation while capturing significant productivity and competitive advantages.

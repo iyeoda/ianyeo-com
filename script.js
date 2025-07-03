@@ -1011,7 +1011,7 @@ function getFieldLabel(fieldName) {
     lastName: 'Last Name',
     email: 'Email Address',
     phone: 'Phone Number',
-    company: 'Company/Organization',
+    company: 'Company/Organisation',
     title: 'Job Title',
     role: 'Role/Interest',
     interest: 'Specific Interest',

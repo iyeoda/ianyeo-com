@@ -33,7 +33,7 @@ This document outlines potential improvements for the codebase, ordered by prior
 
 #### 3. Refactor Code into Modules
 
-*   **Description:** Both `script.js` and `worker.js` are single, monolithic files. Refactoring them into smaller, more focused ES6 modules would improve readability, organization, and maintainability.
+*   **Description:** Both `script.js` and `worker.js` are single, monolithic files. Refactoring them into smaller, more focused ES6 modules would improve readability, organisation, and maintainability.
 *   **Effort/Difficulty:** **Medium**
 *   **Implementation:**
     *   **`worker.js`:**

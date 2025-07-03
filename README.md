@@ -19,7 +19,7 @@ The live website can be viewed at: [https://ianyeo.com](https://ianyeo.com)
     *   The download link provides access to the PDF file stored in Cloudflare R2, with a limited number of downloads allowed.
 *   **Serverless Architecture:** The entire backend is powered by Cloudflare Workers, providing a scalable and cost-effective solution.
 *   **CI/CD:** The website and worker are automatically deployed to Cloudflare via GitHub Actions.
-*   **SEO Optimized:** The website is heavily optimized for search engines, with extensive structured data (JSON-LD), meta tags, and a focus on Core Web Vitals.
+*   **SEO Optimised:** The website is heavily optimised for search engines, with extensive structured data (JSON-LD), meta tags, and a focus on Core Web Vitals.
 
 ## Technology Stack
 
@@ -149,7 +149,7 @@ The gated report system is a core feature of this project. Here's how it works:
 6.  **Email:** The worker sends an email to the user with a secure download link containing the token.
 7.  **Download:** When the user clicks the link, they are taken to the `/api/download-report` endpoint. The worker validates the token, checks the download limit, and then streams the PDF file from Cloudflare R2.
 
-This system ensures that the executive brief is only accessible to authorized users and that the access is time-limited and tracked.
+This system ensures that the executive brief is only accessible to authorised users and that the access is time-limited and tracked.
 
 ## Contributing
 

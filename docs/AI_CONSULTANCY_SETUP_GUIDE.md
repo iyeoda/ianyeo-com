@@ -239,7 +239,7 @@ gtag('event', 'conversion', {
 
 - Responsive design works on all screen sizes
 - Touch-friendly form elements
-- Optimized for mobile conversion flows
+- Optimised for mobile conversion flows
 - Progressive enhancement for older browsers
 
 ## 🎯 Conversion Optimization

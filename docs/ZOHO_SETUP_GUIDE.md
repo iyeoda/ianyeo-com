@@ -161,7 +161,7 @@ Your landing page at `/ai-construction-consulting` now uses the direct booking b
 - ✅ Real-time availability and conflict prevention
 - ✅ Full CRM integration when bookings are made
 - ✅ Professional email templates and branding
-- ✅ Mobile-optimized booking experience
+- ✅ Mobile-optimised booking experience
 - ✅ Analytics tracking for conversion optimization
 
 ### 2.8 CRM Integration (Automatic)

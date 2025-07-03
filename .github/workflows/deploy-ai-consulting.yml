@@ -98,7 +98,7 @@ jobs:
         
       - name: Build Assets
         run: |
-          # Create optimized build directory
+          # Create optimised build directory
           mkdir -p dist
           
           # Copy HTML file

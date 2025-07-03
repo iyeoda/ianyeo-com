@@ -222,7 +222,7 @@ Add custom fields by:
 - `firstName` - First Name (min 2 chars)
 - `lastName` - Last Name (min 2 chars)
 - `email` - Email Address (valid format)
-- `company` - Company/Organization (min 2 chars)
+- `company` - Company/Organisation (min 2 chars)
 - `title` - Job Title
 - `role` - Role/Interest (dropdown)
 - `interest` - Specific Interest (dropdown)
@@ -330,7 +330,7 @@ wrangler kv:key get "log:request:timestamp:token" --namespace-id YOUR_NAMESPACE_
 4. **Relationship Building** - Personal outreach for high-value prospects
 
 ### Performance Optimization
-1. **Fast Loading** - Optimized images and minimal JavaScript
+1. **Fast Loading** - Optimised images and minimal JavaScript
 2. **Mobile Responsive** - Works perfectly on all devices
 3. **SEO Friendly** - Proper meta tags and structured data
 4. **Accessibility** - WCAG compliant form and navigation

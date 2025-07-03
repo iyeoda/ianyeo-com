@@ -10,7 +10,7 @@
 
 ### ✅ **Enhanced Meta Tags**
 - **Title optimization** - Keyword-rich, branded titles
-- **Meta descriptions** - Compelling, search-optimized descriptions
+- **Meta descriptions** - Compelling, search-optimised descriptions
 - **Keywords meta tag** - Relevant keyword targeting
 - **Geographic targeting** - GB/UK location signals
 - **Language/locale tags** - International SEO support
@@ -18,13 +18,13 @@
 
 ### ✅ **Advanced Open Graph & Social**
 - **Enhanced OG tags** - Rich social media previews
-- **Twitter Cards** - Optimized Twitter sharing
+- **Twitter Cards** - Optimised Twitter sharing
 - **Profile-specific OG** - Person schema integration
 - **Image optimization** - Proper image dimensions/alt text
 
 ### ✅ **Comprehensive Structured Data**
 - **Person Schema** - Complete professional profile
-- **Organization Schema** - Operance company details  
+- **Organisation Schema** - Operance company details  
 - **Website Schema** - Site-level metadata
 - **Educational credentials** - University/professional qualifications
 - **Skills & expertise** - Technical competencies
@@ -231,4 +231,4 @@ X-XSS-Protection: 1; mode=block
 - Video content creation
 - Thought leadership positioning
 
-This comprehensive SEO implementation provides a solid foundation for establishing Ian Yeo as a recognized thought leader in PropTech and executive leadership, driving qualified traffic and professional opportunities. 
+This comprehensive SEO implementation provides a solid foundation for establishing Ian Yeo as a recognised thought leader in PropTech and executive leadership, driving qualified traffic and professional opportunities. 
