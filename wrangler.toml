@@ -123,3 +123,27 @@ bucket = "./"
 [[env.development.service_bindings]]
 name = "ASSETS"
 service = "__STATIC_CONTENT" 
+
+# Production settings
+[env.production]
+name = "ianyeo-com"
+vars = { SITE_URL = "https://ianyeo.com", REPORT_FILE_KEY = "Ian_Yeo_CEO_Executive_Brief_2025.pdf" }
+
+[env.production.site]
+bucket = "./"
+
+[[env.production.service_bindings]]
+name = "ASSETS"
+service = "__STATIC_CONTENT"
+
+# Staging settings (optional)
+[env.staging]
+name = "ianyeo-com-staging"
+vars = { SITE_URL = "https://staging.ianyeo.com", REPORT_FILE_KEY = "executive-report-staging.pdf" }
+
+[env.staging.site]
+bucket = "./"
+
+[[env.staging.service_bindings]]
+name = "ASSETS"
+service = "__STATIC_CONTENT" 

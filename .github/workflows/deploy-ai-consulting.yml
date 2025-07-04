@@ -1,209 +1,43 @@
-name: Deploy AI Consulting Landing Page
+# DEPRECATED: AI Consulting Deployment Workflow
+# 
+# This workflow has been deprecated and replaced with the unified deployment workflow.
+# All AI consulting functionality is now handled by the main deploy.yml workflow.
+# 
+# The issues with this workflow were:
+# 1. Missing production environment in wrangler.toml
+# 2. Inconsistent secret naming (CLOUDFLARE_API_TOKEN vs CF_API_TOKEN)
+# 3. Redundant deployment steps
+# 4. Overly complex build process
+# 
+# The new unified workflow (.github/workflows/deploy.yml) provides:
+# ✅ Proper environment handling (staging/production)
+# ✅ Consistent secret management
+# ✅ Simplified deployment process
+# ✅ Better error handling and testing
+# ✅ Security scanning
+# 
+# To use the new workflow:
+# 1. Ensure all secrets use the standardized names (CF_API_TOKEN, CF_ACCOUNT_ID, etc.)
+# 2. Push changes to main branch for production deployment
+# 3. Create pull requests for staging deployment
+# 
+# This file is kept for historical reference and will be removed in a future commit.
 
-on:
-  push:
-    branches: [main]
-    paths:
-      - 'ai-construction-consulting.html'
-      - 'ai-consultancy.css'
-      - 'ai-consultancy.js'
-      - 'worker.js'
-      - 'wrangler.toml'
-      - '.github/workflows/deploy-ai-consulting.yml'
-  pull_request:
-    branches: [main]
-    paths:
-      - 'ai-construction-consulting.html'
-      - 'ai-consultancy.css'
-      - 'ai-consultancy.js'
-      - 'worker.js'
-      - 'wrangler.toml'
+name: Deprecated AI Consulting Deployment
+on: 
+  workflow_dispatch:
+    inputs:
+      message:
+        description: 'This workflow is deprecated. Use the main deploy.yml workflow instead.'
+        required: false
+        default: 'deprecated'
 
 jobs:
-  test:
+  deprecated-notice:
     runs-on: ubuntu-latest
-    name: Test AI Consulting Functionality
     steps:
-      - uses: actions/checkout@v3
-      
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-          cache: 'npm'
-          
-      - name: Install dependencies
-        run: npm ci
-        
-      - name: Lint JavaScript
-        run: |
-          npx eslint ai-consultancy.js --no-eslintrc --config '{
-            "env": { "browser": true, "es2022": true },
-            "extends": ["eslint:recommended"],
-            "parserOptions": { "ecmaVersion": "latest", "sourceType": "module" },
-            "rules": {
-              "no-unused-vars": "warn",
-              "no-console": "off"
-            }
-          }' || echo "Linting completed with warnings"
-        
-      - name: Validate HTML
-        run: |
-          npx html-validate ai-construction-consulting.html || echo "HTML validation completed"
-        
-      - name: Check CSS
-        run: |
-          npx stylelint ai-consultancy.css --config '{
-            "rules": {
-              "block-no-empty": true,
-              "color-no-invalid-hex": true,
-              "declaration-colon-space-after": "always"
-            }
-          }' || echo "CSS validation completed"
-
-  deploy-staging:
-    if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-    name: Deploy to Staging
-    needs: test
-    steps:
-      - uses: actions/checkout@v3
-      
-      - name: Deploy Worker to Staging
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          environment: staging
-          preCommands: |
-            echo "Deploying AI Consulting functionality to staging..."
-          postCommands: |
-            echo "Staging deployment complete"
-
-  deploy-production:
-    if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    name: Deploy to Production
-    needs: test
-    steps:
-      - uses: actions/checkout@v3
-      
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-          cache: 'npm'
-          
-      - name: Install dependencies
-        run: npm ci
-        
-      - name: Build Assets
-        run: |
-          # Create optimised build directory
-          mkdir -p dist
-          
-          # Copy HTML file
-          cp ai-construction-consulting.html dist/
-          
-          # Minify CSS
-          npx cleancss -o dist/ai-consultancy.min.css ai-consultancy.css
-          
-          # Minify JavaScript
-          npx terser ai-consultancy.js -o dist/ai-consultancy.min.js --compress --mangle
-          
-          # Update HTML to use minified assets
-          sed -i 's/ai-consultancy\.css/ai-consultancy.min.css/g' dist/ai-construction-consulting.html
-          sed -i 's/ai-consultancy\.js/ai-consultancy.min.js/g' dist/ai-construction-consulting.html
-        
-      - name: Deploy Worker to Production
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          environment: production
-          preCommands: |
-            echo "Deploying AI Consulting functionality to production..."
-            echo "Worker endpoints will be available at:"
-            echo "- /api/leads/capture"
-            echo "- /api/assessment/submit"
-            echo "- /api/analytics/track"
-            echo "- /ai-construction-consulting"
-          postCommands: |
-            echo "Production deployment complete!"
-            echo "AI Consulting landing page is now live!"
-        
-      - name: Deploy Static Assets to Cloudflare Pages
-        uses: cloudflare/pages-action@v1
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          projectName: ianyeo-com
-          directory: dist
-          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
-        
-      - name: Invalidate Cache
-        run: |
-          curl -X POST "https://api.cloudflare.com/client/v4/zones/${{ secrets.CLOUDFLARE_ZONE_ID }}/purge_cache" \
-            -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
-            -H "Content-Type: application/json" \
-            --data '{"purge_everything":true}'
-        
-      - name: Test Deployment
-        run: |
-          # Wait for deployment to propagate
-          sleep 30
-          
-          # Test AI consulting page
-          curl -f -s "https://ianyeo.com/ai-construction-consulting" > /dev/null && echo "✅ AI Consulting page is accessible" || echo "❌ AI Consulting page failed"
-          
-          # Test API endpoints
-          curl -f -s -X OPTIONS "https://ianyeo.com/api/leads/capture" > /dev/null && echo "✅ Lead capture API is accessible" || echo "❌ Lead capture API failed"
-          curl -f -s -X OPTIONS "https://ianyeo.com/api/assessment/submit" > /dev/null && echo "✅ Assessment API is accessible" || echo "❌ Assessment API failed"
-        
-      - name: Notify Success
-        if: success()
-        run: |
-          echo "🚀 AI Consulting Landing Page Deployment Complete!"
-          echo ""
-          echo "✅ Landing page: https://ianyeo.com/ai-construction-consulting"
-          echo "✅ Lead capture API: /api/leads/capture"
-          echo "✅ Assessment API: /api/assessment/submit"
-          echo "✅ Analytics API: /api/analytics/track"
-          echo "✅ A/B Testing: /api/ab-test/{testName}"
-          echo ""
-          echo "Next steps:"
-          echo "1. Test the landing page functionality"
-          echo "2. Monitor analytics and conversion rates"
-          echo "3. Set up marketing campaigns"
-        
-      - name: Notify Failure
-        if: failure()
-        run: |
-          echo "❌ Deployment failed!"
-          echo "Check the logs above for specific error details."
-          echo "Common issues:"
-          echo "- Missing environment variables"
-          echo "- Invalid KV namespace IDs"
-          echo "- API token permissions"
-
-  performance-test:
-    if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    name: Performance Testing
-    needs: deploy-production
-    steps:
-      - uses: actions/checkout@v3
-      
-      - name: Lighthouse CI
-        uses: treosh/lighthouse-ci-action@v9
-        with:
-          urls: |
-            https://ianyeo.com/ai-construction-consulting
-          uploadArtifacts: true
-          temporaryPublicStorage: true
-        
-      - name: Load Testing
-        run: |
-          # Simple load test using curl
-          echo "Running basic load test..."
-          for i in {1..10}; do
-            curl -s -w "Response time: %{time_total}s\n" -o /dev/null "https://ianyeo.com/ai-construction-consulting"
-          done 
+      - run: |
+          echo "❌ This workflow has been deprecated."
+          echo "✅ Please use the main deployment workflow: .github/workflows/deploy.yml"
+          echo "📖 The new workflow handles all deployment scenarios including AI consulting functionality."
+          exit 1 

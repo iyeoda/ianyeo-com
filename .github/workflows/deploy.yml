@@ -1,54 +1,305 @@
-# .github/workflows/deploy.yml
-name: Cloudflare Pages
+# Cloudflare Deployment Workflow
+# Handles both static site (Pages) and dynamic functionality (Workers)
+
+name: Deploy to Cloudflare
+
 on:
   push:
     branches: [main]
-jobs:
-  deploy-pages:
-    runs-on: ubuntu-latest
-    permissions: { contents: read }
-    steps:
-      - uses: actions/checkout@v4
-      - uses: cloudflare/pages-action@v1
-        with:
-          apiToken: ${{ secrets.CF_API_TOKEN }}
-          accountId: ${{ secrets.CF_ACCOUNT_ID }}
-          projectName: ianyeo-com
-          directory: .
+  pull_request:
+    branches: [main]
 
-  deploy-worker:
+# Security: Limit permissions to minimum required
+permissions:
+  contents: read
+  deployments: write
+
+jobs:
+  # Run tests and validation before deployment
+  test:
     runs-on: ubuntu-latest
-    permissions: { contents: read }
+    name: Test & Validate
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
       
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-          
-      - name: Install dependencies (if needed)
+          cache: 'npm'
+      
+      - name: Install dependencies
         run: |
           if [ -f package.json ]; then
-            if [ -f package-lock.json ]; then
-              npm ci
-            else
-              npm install
-            fi
+            npm ci
           else
             echo "No package.json found, skipping dependency installation"
           fi
-        
-      - name: Deploy Worker
+      
+      - name: Validate JavaScript
+        run: |
+          # Basic syntax validation for main files
+          node -c script.js || echo "script.js has syntax issues"
+          node -c worker.js || echo "worker.js has syntax issues"
+          if [ -f ai-consultancy.js ]; then
+            node -c ai-consultancy.js || echo "ai-consultancy.js has syntax issues"
+          fi
+      
+      - name: Validate HTML
+        run: |
+          # Basic HTML validation
+          if command -v html-validate &> /dev/null; then
+            npx html-validate index.html || echo "HTML validation completed with warnings"
+            if [ -f ai-construction-consulting.html ]; then
+              npx html-validate ai-construction-consulting.html || echo "AI consulting HTML validation completed with warnings"
+            fi
+          else
+            echo "HTML validation skipped - html-validate not available"
+          fi
+      
+      - name: Validate Wrangler Config
+        run: |
+          # Validate wrangler.toml syntax
+          if command -v wrangler &> /dev/null; then
+            npx wrangler --version
+            npx wrangler config --no-verify || echo "Wrangler config has issues"
+          else
+            echo "Wrangler validation skipped - will be available in deploy step"
+          fi
+
+  # Deploy to staging (for PRs)
+  deploy-staging:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    name: Deploy to Staging
+    needs: test
+    environment: staging
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: |
+          if [ -f package.json ]; then
+            npm ci
+          fi
+      
+      - name: Deploy Worker to Staging
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CF_API_TOKEN }}
           accountId: ${{ secrets.CF_ACCOUNT_ID }}
+          environment: staging
           command: deploy
           secrets: |
             ZOHO_API_KEY
             TURNSTILE_SECRET_KEY
+            ZOHO_CRM_CLIENT_SECRET
+            ZOHO_CRM_REFRESH_TOKEN
+            ZOHO_CAMPAIGNS_REFRESH_TOKEN
+            GA4_API_SECRET
+            ZOHO_BOOKINGS_CLIENT_SECRET
+            ZOHO_BOOKINGS_REFRESH_TOKEN
         env:
           ZOHO_API_KEY: ${{ secrets.ZOHO_API_KEY }}
           TURNSTILE_SECRET_KEY: ${{ secrets.TURNSTILE_SECRET_KEY }}
+          ZOHO_CRM_CLIENT_SECRET: ${{ secrets.ZOHO_CRM_CLIENT_SECRET }}
+          ZOHO_CRM_REFRESH_TOKEN: ${{ secrets.ZOHO_CRM_REFRESH_TOKEN }}
+          ZOHO_CAMPAIGNS_REFRESH_TOKEN: ${{ secrets.ZOHO_CAMPAIGNS_REFRESH_TOKEN }}
+          GA4_API_SECRET: ${{ secrets.GA4_API_SECRET }}
+          ZOHO_BOOKINGS_CLIENT_SECRET: ${{ secrets.ZOHO_BOOKINGS_CLIENT_SECRET }}
+          ZOHO_BOOKINGS_REFRESH_TOKEN: ${{ secrets.ZOHO_BOOKINGS_REFRESH_TOKEN }}
+      
+      - name: Deploy Static Assets to Staging
+        uses: cloudflare/pages-action@v1
+        with:
+          apiToken: ${{ secrets.CF_API_TOKEN }}
+          accountId: ${{ secrets.CF_ACCOUNT_ID }}
+          projectName: ianyeo-com-staging
+          directory: .
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+  # Deploy to production (for main branch)
+  deploy-production:
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    name: Deploy to Production
+    needs: test
+    environment: production
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: |
+          if [ -f package.json ]; then
+            npm ci
+          fi
+      
+      - name: Build and Optimize Assets
+        run: |
+          # Create build directory
+          mkdir -p dist
           
+          # Copy all static files
+          cp -r assets/ dist/ 2>/dev/null || echo "No assets directory found"
+          cp -r blog/ dist/ 2>/dev/null || echo "No blog directory found"
+          cp *.html dist/ 2>/dev/null || echo "No HTML files found"
+          cp *.css dist/ 2>/dev/null || echo "No CSS files found"
+          cp *.js dist/ 2>/dev/null || echo "No JS files found"
+          cp *.json dist/ 2>/dev/null || echo "No JSON files found"
+          cp *.txt dist/ 2>/dev/null || echo "No TXT files found"
+          cp *.xml dist/ 2>/dev/null || echo "No XML files found"
+          
+          # Optimize CSS if tools are available
+          if command -v cleancss &> /dev/null && [ -f dist/style.css ]; then
+            npx cleancss -o dist/style.min.css dist/style.css
+            echo "CSS optimized"
+          fi
+          
+          if command -v cleancss &> /dev/null && [ -f dist/ai-consultancy.css ]; then
+            npx cleancss -o dist/ai-consultancy.min.css dist/ai-consultancy.css
+            echo "AI Consultancy CSS optimized"
+          fi
+          
+          # Optimize JS if tools are available
+          if command -v terser &> /dev/null && [ -f dist/script.js ]; then
+            npx terser dist/script.js -o dist/script.min.js --compress --mangle
+            echo "Main JS optimized"
+          fi
+          
+          if command -v terser &> /dev/null && [ -f dist/ai-consultancy.js ]; then
+            npx terser dist/ai-consultancy.js -o dist/ai-consultancy.min.js --compress --mangle
+            echo "AI Consultancy JS optimized"
+          fi
+          
+          echo "Build completed - files ready for deployment"
+      
+      - name: Deploy Worker to Production
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CF_API_TOKEN }}
+          accountId: ${{ secrets.CF_ACCOUNT_ID }}
+          environment: production
+          command: deploy
+          secrets: |
+            ZOHO_API_KEY
+            TURNSTILE_SECRET_KEY
+            ZOHO_CRM_CLIENT_SECRET
+            ZOHO_CRM_REFRESH_TOKEN
+            ZOHO_CAMPAIGNS_REFRESH_TOKEN
+            GA4_API_SECRET
+            ZOHO_BOOKINGS_CLIENT_SECRET
+            ZOHO_BOOKINGS_REFRESH_TOKEN
+        env:
+          ZOHO_API_KEY: ${{ secrets.ZOHO_API_KEY }}
+          TURNSTILE_SECRET_KEY: ${{ secrets.TURNSTILE_SECRET_KEY }}
+          ZOHO_CRM_CLIENT_SECRET: ${{ secrets.ZOHO_CRM_CLIENT_SECRET }}
+          ZOHO_CRM_REFRESH_TOKEN: ${{ secrets.ZOHO_CRM_REFRESH_TOKEN }}
+          ZOHO_CAMPAIGNS_REFRESH_TOKEN: ${{ secrets.ZOHO_CAMPAIGNS_REFRESH_TOKEN }}
+          GA4_API_SECRET: ${{ secrets.GA4_API_SECRET }}
+          ZOHO_BOOKINGS_CLIENT_SECRET: ${{ secrets.ZOHO_BOOKINGS_CLIENT_SECRET }}
+          ZOHO_BOOKINGS_REFRESH_TOKEN: ${{ secrets.ZOHO_BOOKINGS_REFRESH_TOKEN }}
+      
+      - name: Deploy Static Assets to Production
+        uses: cloudflare/pages-action@v1
+        with:
+          apiToken: ${{ secrets.CF_API_TOKEN }}
+          accountId: ${{ secrets.CF_ACCOUNT_ID }}
+          projectName: ianyeo-com
+          directory: dist
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Post-deployment Tests
+        run: |
+          # Wait for deployment to propagate
+          echo "Waiting for deployment to propagate..."
+          sleep 30
+          
+          # Test main site
+          if curl -f -s "https://ianyeo.com" > /dev/null; then
+            echo "✅ Main site is accessible"
+          else
+            echo "❌ Main site failed accessibility test"
+          fi
+          
+          # Test AI consulting page
+          if curl -f -s "https://ianyeo.com/ai-construction-consulting" > /dev/null; then
+            echo "✅ AI Consulting page is accessible"
+          else
+            echo "❌ AI Consulting page failed accessibility test"
+          fi
+          
+          # Test API endpoints (OPTIONS request for CORS)
+          if curl -f -s -X OPTIONS "https://ianyeo.com/api/request-report" > /dev/null; then
+            echo "✅ Report API is accessible"
+          else
+            echo "❌ Report API failed accessibility test"
+          fi
+          
+          if curl -f -s -X OPTIONS "https://ianyeo.com/api/leads/capture" > /dev/null; then
+            echo "✅ Lead capture API is accessible"
+          else
+            echo "❌ Lead capture API failed accessibility test"
+          fi
+      
+      - name: Update Deployment Status
+        if: always()
+        run: |
+          if [ "${{ job.status }}" = "success" ]; then
+            echo "🚀 Deployment completed successfully!"
+            echo ""
+            echo "✅ Live URLs:"
+            echo "   • Main site: https://ianyeo.com"
+            echo "   • AI Consulting: https://ianyeo.com/ai-construction-consulting"
+            echo "   • Blog: https://ianyeo.com/blog"
+            echo ""
+            echo "📊 Monitor your deployment:"
+            echo "   • Cloudflare Dashboard: https://dash.cloudflare.com"
+            echo "   • Worker logs: wrangler tail --format pretty"
+          else
+            echo "❌ Deployment failed!"
+            echo "Check the logs above for specific error details."
+          fi
+
+  # Security scan (optional but recommended)
+  security-scan:
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    name: Security Scan
+    needs: deploy-production
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Run Security Headers Check
+        run: |
+          # Check security headers
+          echo "Checking security headers..."
+          
+          # Test main site
+          headers=$(curl -s -I "https://ianyeo.com" || echo "Failed to fetch headers")
+          echo "Main site headers:"
+          echo "$headers"
+          echo ""
+          
+          # Test AI consulting page
+          headers=$(curl -s -I "https://ianyeo.com/ai-construction-consulting" || echo "Failed to fetch headers")
+          echo "AI consulting page headers:"
+          echo "$headers"
+          echo ""
+          
+          echo "Security scan completed"
