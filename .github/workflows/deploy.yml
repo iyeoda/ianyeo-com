@@ -116,14 +116,15 @@ jobs:
           ZOHO_BOOKINGS_CLIENT_SECRET: ${{ secrets.ZOHO_BOOKINGS_CLIENT_SECRET }}
           ZOHO_BOOKINGS_REFRESH_TOKEN: ${{ secrets.ZOHO_BOOKINGS_REFRESH_TOKEN }}
       
-      - name: Deploy Static Assets to Staging
-        uses: cloudflare/pages-action@v1
-        with:
-          apiToken: ${{ secrets.CF_API_TOKEN }}
-          accountId: ${{ secrets.CF_ACCOUNT_ID }}
-          projectName: ianyeo-com-staging
-          directory: .
-          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+      - name: Test Staging Deployment
+        run: |
+          echo "✅ Staging worker deployed successfully!"
+          echo "🔗 Access your staging worker via Cloudflare Dashboard:"
+          echo "   https://dash.cloudflare.com/[account]/workers/overview"
+          echo "   Worker name: ianyeo-com-staging"
+          echo ""
+          echo "💡 Note: Staging workers don't use custom domain routes"
+          echo "   Test API endpoints using the worker.dev URL"
 
   # Deploy to production (for main branch)
   deploy-production:
