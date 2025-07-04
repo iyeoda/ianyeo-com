@@ -74,7 +74,6 @@ jobs:
     runs-on: ubuntu-latest
     name: Deploy to Staging
     needs: test
-    environment: staging
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -132,7 +131,6 @@ jobs:
     runs-on: ubuntu-latest
     name: Deploy to Production
     needs: test
-    environment: production
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
