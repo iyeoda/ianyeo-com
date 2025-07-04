@@ -231,27 +231,27 @@ ZOHO_BOOKINGS_CLIENT_ID = "1000.Y29FWY9M8MKMB0Z2Y0VNGKLKUZ1G3U"
 
 [[env.staging.kv_namespaces]]
 binding = "REPORT_ACCESS"
-preview_id = "2985eb457cdd46c4a637d41f8a419983"
+id = "2985eb457cdd46c4a637d41f8a419983"
 
 [[env.staging.kv_namespaces]]
 binding = "LEADS_DB"
-preview_id = "a41b86bd9bcb4268975b440bec7d7703"
+id = "a41b86bd9bcb4268975b440bec7d7703"
 
 [[env.staging.kv_namespaces]]
 binding = "ASSESSMENTS_DB"
-preview_id = "cbc058ec5f374789a6533a63ae1609e9"
+id = "cbc058ec5f374789a6533a63ae1609e9"
 
 [[env.staging.kv_namespaces]]
 binding = "ANALYTICS_DB"
-preview_id = "28f481af3e0f4d3886d6d6406d57398b"
+id = "28f481af3e0f4d3886d6d6406d57398b"
 
 [[env.staging.r2_buckets]]
 binding = "EXECUTIVE_REPORTS"
-preview_bucket_name = "executive-reports-preview"
+bucket_name = "executive-reports-preview"
 
 [[env.staging.r2_buckets]]
 binding = "LEAD_MAGNETS"
-preview_bucket_name = "lead-magnets-preview"
+bucket_name = "lead-magnets-preview"
 
 [env.staging.site]
 bucket = "./"
