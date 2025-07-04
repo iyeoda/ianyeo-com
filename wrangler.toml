@@ -131,6 +131,30 @@ GA4_MEASUREMENT_ID = "your-ga4-measurement-id"
 ZOHO_BOOKINGS_API_URL = "https://www.zohoapis.com/bookings/v1"
 ZOHO_BOOKINGS_CLIENT_ID = "1000.Y29FWY9M8MKMB0Z2Y0VNGKLKUZ1G3U"
 
+[[env.development.kv_namespaces]]
+binding = "REPORT_ACCESS"
+preview_id = "2985eb457cdd46c4a637d41f8a419983"
+
+[[env.development.kv_namespaces]]
+binding = "LEADS_DB"
+preview_id = "a41b86bd9bcb4268975b440bec7d7703"
+
+[[env.development.kv_namespaces]]
+binding = "ASSESSMENTS_DB"
+preview_id = "cbc058ec5f374789a6533a63ae1609e9"
+
+[[env.development.kv_namespaces]]
+binding = "ANALYTICS_DB"
+preview_id = "28f481af3e0f4d3886d6d6406d57398b"
+
+[[env.development.r2_buckets]]
+binding = "EXECUTIVE_REPORTS"
+preview_bucket_name = "executive-reports-preview"
+
+[[env.development.r2_buckets]]
+binding = "LEAD_MAGNETS"
+preview_bucket_name = "lead-magnets-preview"
+
 [env.development.site]
 bucket = "./"
 
@@ -156,6 +180,30 @@ GA4_MEASUREMENT_ID = "your-ga4-measurement-id"
 ZOHO_BOOKINGS_API_URL = "https://www.zohoapis.com/bookings/v1"
 ZOHO_BOOKINGS_CLIENT_ID = "1000.Y29FWY9M8MKMB0Z2Y0VNGKLKUZ1G3U"
 
+[[env.production.kv_namespaces]]
+binding = "REPORT_ACCESS"
+id = "920339f6aedd41b09a20d58d415b81d7"
+
+[[env.production.kv_namespaces]]
+binding = "LEADS_DB"
+id = "3c1c0a3bae1e469f8e9fb8addcb1de5a"
+
+[[env.production.kv_namespaces]]
+binding = "ASSESSMENTS_DB"
+id = "5163eb05989245a199b5cccccd60cfe2"
+
+[[env.production.kv_namespaces]]
+binding = "ANALYTICS_DB"
+id = "1c47688f310f4c40bc78bbcd57986009"
+
+[[env.production.r2_buckets]]
+binding = "EXECUTIVE_REPORTS"
+bucket_name = "executive-reports"
+
+[[env.production.r2_buckets]]
+binding = "LEAD_MAGNETS"
+bucket_name = "lead-magnets"
+
 [env.production.site]
 bucket = "./"
 
@@ -180,6 +228,30 @@ ZOHO_CRM_CLIENT_ID = "1000.Y29FWY9M8MKMB0Z2Y0VNGKLKUZ1G3U"
 GA4_MEASUREMENT_ID = "your-ga4-measurement-id"
 ZOHO_BOOKINGS_API_URL = "https://www.zohoapis.com/bookings/v1"
 ZOHO_BOOKINGS_CLIENT_ID = "1000.Y29FWY9M8MKMB0Z2Y0VNGKLKUZ1G3U"
+
+[[env.staging.kv_namespaces]]
+binding = "REPORT_ACCESS"
+preview_id = "2985eb457cdd46c4a637d41f8a419983"
+
+[[env.staging.kv_namespaces]]
+binding = "LEADS_DB"
+preview_id = "a41b86bd9bcb4268975b440bec7d7703"
+
+[[env.staging.kv_namespaces]]
+binding = "ASSESSMENTS_DB"
+preview_id = "cbc058ec5f374789a6533a63ae1609e9"
+
+[[env.staging.kv_namespaces]]
+binding = "ANALYTICS_DB"
+preview_id = "28f481af3e0f4d3886d6d6406d57398b"
+
+[[env.staging.r2_buckets]]
+binding = "EXECUTIVE_REPORTS"
+preview_bucket_name = "executive-reports-preview"
+
+[[env.staging.r2_buckets]]
+binding = "LEAD_MAGNETS"
+preview_bucket_name = "lead-magnets-preview"
 
 [env.staging.site]
 bucket = "./"
