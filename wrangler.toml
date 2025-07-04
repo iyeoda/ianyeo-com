@@ -75,40 +75,8 @@ ZOHO_BOOKINGS_CLIENT_ID = "1000.Y29FWY9M8MKMB0Z2Y0VNGKLKUZ1G3U"
 # wrangler secret put ZOHO_BOOKINGS_REFRESH_TOKEN
 # =============================================================================
 
-# Routes for handling API requests
-[[routes]]
-pattern = "ianyeo.com/api/*"
-zone_name = "ianyeo.com"
-
-[[routes]]
-pattern = "www.ianyeo.com/api/*"
-zone_name = "ianyeo.com"
-
-# New route for AI consultancy landing page
-[[routes]]
-pattern = "ianyeo.com/ai-construction-consulting"
-zone_name = "ianyeo.com"
-
-[[routes]]
-pattern = "www.ianyeo.com/ai-construction-consulting"
-zone_name = "ianyeo.com"
-
-# New routes for blog
-[[routes]]
-pattern = "ianyeo.com/blog"
-zone_name = "ianyeo.com"
-
-[[routes]]
-pattern = "ianyeo.com/blog/*"
-zone_name = "ianyeo.com"
-
-[[routes]]
-pattern = "www.ianyeo.com/blog"
-zone_name = "ianyeo.com"
-
-[[routes]]
-pattern = "www.ianyeo.com/blog/*"
-zone_name = "ianyeo.com"
+# Routes for handling API requests (production only)
+# Staging workers are accessed via Cloudflare dashboard for testing
 
 [site]
 bucket = "./"
@@ -203,6 +171,39 @@ bucket_name = "executive-reports"
 [[env.production.r2_buckets]]
 binding = "LEAD_MAGNETS"
 bucket_name = "lead-magnets"
+
+# Production routes
+[[env.production.routes]]
+pattern = "ianyeo.com/api/*"
+zone_name = "ianyeo.com"
+
+[[env.production.routes]]
+pattern = "www.ianyeo.com/api/*"
+zone_name = "ianyeo.com"
+
+[[env.production.routes]]
+pattern = "ianyeo.com/ai-construction-consulting"
+zone_name = "ianyeo.com"
+
+[[env.production.routes]]
+pattern = "www.ianyeo.com/ai-construction-consulting"
+zone_name = "ianyeo.com"
+
+[[env.production.routes]]
+pattern = "ianyeo.com/blog"
+zone_name = "ianyeo.com"
+
+[[env.production.routes]]
+pattern = "ianyeo.com/blog/*"
+zone_name = "ianyeo.com"
+
+[[env.production.routes]]
+pattern = "www.ianyeo.com/blog"
+zone_name = "ianyeo.com"
+
+[[env.production.routes]]
+pattern = "www.ianyeo.com/blog/*"
+zone_name = "ianyeo.com"
 
 [env.production.site]
 bucket = "./"
