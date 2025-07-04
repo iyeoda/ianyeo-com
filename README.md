@@ -101,12 +101,60 @@ This will start a local development server, typically at `http://localhost:8787`
 
 ## Deployment
 
-The project is automatically deployed to Cloudflare using GitHub Actions. The workflow is defined in `.github/workflows/deploy.yml`.
+The project uses an optimized, unified deployment system that automatically handles both static site deployment and serverless functions. The system has been completely redesigned for security, robustness, and ease of use.
 
-*   **Cloudflare Pages:** The static website (HTML, CSS, JS) is deployed to Cloudflare Pages.
-*   **Cloudflare Worker:** The `worker.js` file is deployed as a Cloudflare Worker.
+### New Deployment System (v2.0)
 
-When changes are pushed to the `main` branch, the GitHub Actions workflow will automatically build and deploy the project to Cloudflare.
+**Key Features:**
+*   **Unified Workflow:** Single GitHub Actions workflow handles all deployment scenarios
+*   **Environment Management:** Proper staging/production environment separation
+*   **Security First:** Minimal permissions, secret management, and automatic security scanning
+*   **Robust Testing:** Pre-deployment validation and post-deployment verification
+*   **Asset Optimization:** Automatic minification and optimization of CSS/JS
+*   **Performance Monitoring:** Built-in performance and security checks
+
+**Deployment Flow:**
+*   **Production:** Automatic deployment on push to `main` branch
+*   **Staging:** Automatic deployment for pull requests
+*   **Development:** Manual deployment via `wrangler dev`
+
+### Quick Start
+
+1. **Configure GitHub Secrets:**
+   ```bash
+   CF_API_TOKEN          # Cloudflare API token
+   CF_ACCOUNT_ID         # Cloudflare account ID  
+   ZOHO_API_KEY         # ZeptoMail API key
+   TURNSTILE_SECRET_KEY # Turnstile secret key
+   ```
+
+2. **Deploy:**
+   - Push to `main` branch for production
+   - Create pull request for staging
+   - Use `wrangler deploy` for manual deployment
+
+3. **Monitor:**
+   - GitHub Actions tab for deployment status
+   - `wrangler tail` for real-time logs
+   - Cloudflare Dashboard for analytics
+
+### Migration from v1.0
+
+If you're upgrading from the old system, run the migration script:
+
+```bash
+./migrate-to-new-deployment.sh
+```
+
+This will guide you through updating secrets, testing the configuration, and verifying the new system works properly.
+
+### Documentation
+
+*   **[Deployment Guide](docs/DEPLOYMENT_GUIDE.md)** - Complete setup and usage guide
+*   **[Technical Guide](docs/technical_implementation_guide.md)** - Technical implementation details
+*   **[AI Consultancy Setup](docs/AI_CONSULTANCY_SETUP_GUIDE.md)** - AI consultancy specific configuration
+
+The new system is more secure, reliable, and easier to maintain than the previous version.
 
 ## Project Structure
 
@@ -136,6 +184,24 @@ The blog is managed by adding, editing, or deleting Markdown files in the `/blog
 *   **Deleting a Post:** Delete the Markdown file.
 
 Changes pushed to the `main` branch will be automatically reflected on the live website. For more details, see `blog/README.md`.
+
+## Documentation
+
+Comprehensive documentation for setup, configuration, and optimization is available in the `/docs` directory:
+
+### Email & Marketing Strategy
+*   **[Email Optimization Strategy](docs/EMAIL_OPTIMIZATION_STRATEGY.md)** - Complete guide to C-suite email engagement optimization, including research insights, template design, and performance metrics
+*   **[Email Quick Reference](docs/EMAIL_OPTIMIZATION_QUICK_REFERENCE.md)** - Quick reference guide for email subject lines, messaging, and key metrics
+
+### Technical Setup Guides
+*   **[AI Consultancy Setup](docs/AI_CONSULTANCY_SETUP_GUIDE.md)** - Complete setup guide for the AI consultancy landing page and lead generation system
+*   **[Executive Report Setup](docs/EXECUTIVE_REPORT_SETUP.md)** - Detailed setup guide for the gated content system
+*   **[Zoho Integration Setup](docs/ZOHO_SETUP_GUIDE.md)** - Configuration guide for Zoho CRM, Campaigns, and email services
+*   **[Technical Implementation Guide](docs/technical_implementation_guide.md)** - Comprehensive technical documentation for developers
+
+### SEO & Optimization
+*   **[SEO Implementation Guide](docs/SEO_IMPLEMENTATION_GUIDE.md)** - Complete SEO optimization strategy and implementation details
+*   **[Platform Improvements](docs/IMPROVEMENTS.md)** - Ongoing improvement suggestions and enhancement roadmap
 
 ## Executive Report System
 
