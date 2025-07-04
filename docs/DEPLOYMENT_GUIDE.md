@@ -103,8 +103,8 @@ wrangler secret put TURNSTILE_SECRET_KEY
 # Optional advanced secrets
 wrangler secret put ZOHO_CRM_CLIENT_SECRET
 wrangler secret put ZOHO_CRM_REFRESH_TOKEN
-wrangler secret put ZOHO_CAMPAIGNS_REFRESH_TOKEN
-wrangler secret put GA4_API_SECRET
+wrangler secret put ZOHO_CAMPAIGNS_REFRESH_TOKEN # This is not used for now
+wrangler secret put GA4_API_SECRET # This is not used for now
 wrangler secret put ZOHO_BOOKINGS_CLIENT_SECRET
 wrangler secret put ZOHO_BOOKINGS_REFRESH_TOKEN
 ```
